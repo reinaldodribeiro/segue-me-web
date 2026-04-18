@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Theme */
+  --bg: #f2f4f8;
+  --content-bg: #f8fafc;
+  --panel: #ffffff;
+  --panel-2: #f8fafc;
+  --card-bg: #ffffff;
+
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+
+  /* Primary Brand Scale (default — may be overridden by parish color) */
+  --primary: #6d28d9;
+  --primary-hover: #5b21b6;
+  --primary-active: #4c1d95;
+  --primary-foreground: #ffffff;
+  --primary-subtle-bg: #f3e8ff;
+
+  /* Secondary Brand Scale (default — may be overridden by parish color) */
+  --secondary: #7c3aed;
+  --secondary-hover: #6d28d9;
+  --secondary-subtle-bg: rgba(124, 58, 237, 0.15);
+
+  --hover: #f1f5f9;
+  --hover-foreground: #1e293b;
+  --focus-ring: rgba(109, 40, 217, 0.35);
+
+  --input-bg: #ffffff;
+  --input-text: #0f172a;
+  --input-border: #cbd5e1;
+  --input-placeholder: #94a3b8;
+}
+
+[data-theme="dark"] {
+  --bg: #020617;
+  --content-bg: #0f172a;
+  --panel: #1e293b;
+  --panel-2: #0f172a;
+  --card-bg: #1e293b;
+
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+
+  /* Primary Brand Scale (dark mode) */
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-active: #5b21b6;
+  --primary-foreground: #ffffff;
+  --primary-subtle-bg: rgba(124, 58, 237, 0.15);
+
+  /* Secondary Brand Scale (dark mode) */
+  --secondary: #8b5cf6;
+  --secondary-hover: #7c3aed;
+  --secondary-subtle-bg: rgba(139, 92, 246, 0.15);
+
+  --hover: #334155;
+  --hover-foreground: #f1f5f9;
+  --focus-ring: rgba(139, 92, 246, 0.5);
+
+  --input-bg: #0f172a;
+  --input-text: #f8fafc;
+  --input-border: #334155;
+  --input-placeholder: #64748b;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border);
+  accent-color: var(--primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+* {
+  box-sizing: border-box;
+}
