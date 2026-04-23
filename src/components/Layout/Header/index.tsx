@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
+import { memo } from 'react';
 import { Menu } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { storageUrl } from '@/utils/helpers';
 
-const Header: React.FC = React.memo(() => {
+const Header: SafeFC = memo(() => {
   const { openMobileDrawer } = useLayout();
   const { user } = useAuth();
 

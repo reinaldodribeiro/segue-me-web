@@ -51,7 +51,7 @@ const ENGAGEMENT_LABELS: Record<EngagementLevel, string> = {
   destaque: "Destaque",
 };
 
-const PeopleList: React.FC = () => {
+const PeopleList: SafeFC = () => {
   useTutorial();
   const { isSuperAdmin, isDioceseAdmin } = usePermissions();
   const isAdmin = isSuperAdmin || isDioceseAdmin;

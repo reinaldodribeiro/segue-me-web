@@ -34,7 +34,7 @@ import SortableTeamRow from './SortableTeamRow';
 import { MovementDetailProps } from './types';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const MovementDetail: React.FC<MovementDetailProps> = ({ id }) => {
+const MovementDetail: SafeFC<MovementDetailProps> = ({ id }) => {
   useTutorial();
   const router = useRouter();
   const { toast } = useToast();

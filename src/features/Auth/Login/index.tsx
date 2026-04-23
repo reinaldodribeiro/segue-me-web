@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/useToast';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 
-const LoginForm: React.FC = () => {
+const LoginForm: SafeFC = () => {
   const router = useRouter();
   const { signIn } = useAuth();
   const { toast } = useToast();

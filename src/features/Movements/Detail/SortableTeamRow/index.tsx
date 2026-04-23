@@ -7,7 +7,7 @@ import { ACCEPTED_TYPE_LABELS } from '@/interfaces/Movement';
 import { resolveTeamIcon } from '@/components/TeamIconPicker';
 import { SortableTeamRowProps } from './types';
 
-const SortableTeamRow: React.FC<SortableTeamRowProps> = ({
+const SortableTeamRow: SafeFC<SortableTeamRowProps> = ({
   team, onEdit, onDelete, onMoveUp, onMoveDown, isFirst, isLast,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: team.id });

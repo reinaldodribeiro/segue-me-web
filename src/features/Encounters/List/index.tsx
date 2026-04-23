@@ -79,7 +79,7 @@ function getValue(enc: Encounter, sortKey: string): string | number {
   return '';
 }
 
-const EncountersList: React.FC = () => {
+const EncountersList: SafeFC = () => {
   useTutorial();
   const [filterStatus, setFilterStatus] = useState('');
   const [search, setSearch] = useState('');

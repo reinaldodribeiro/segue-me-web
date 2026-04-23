@@ -8,7 +8,7 @@ import { useImportStatus } from '@/lib/query/hooks/usePersons';
 
 import { ImportStep, ImportResult, ImportError, PeopleImportProps } from './types';
 
-const PeopleImport: React.FC<PeopleImportProps> = ({ parishId, onClose, onSuccess }) => {
+const PeopleImport: SafeFC<PeopleImportProps> = ({ parishId, onClose, onSuccess }) => {
   const [step, setStep] = useState<ImportStep>('idle');
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);

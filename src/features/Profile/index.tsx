@@ -27,7 +27,7 @@ function getUserRole(user: { roles: (UserRole | { name: string })[] }): UserRole
   return (typeof r === 'string' ? r : r.name) as UserRole;
 }
 
-const Profile: React.FC = () => {
+const Profile: SafeFC = () => {
   const { user, setUser } = useAuth();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();

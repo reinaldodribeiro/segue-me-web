@@ -18,7 +18,7 @@ const EMPTY_STATE: DetailState = {
   loadingSummary: false, loadingAnalysis: false, loadingRefusals: false,
 };
 
-const EncounterDetail: React.FC<EncounterDetailProps> = ({ encounters }) => {
+const EncounterDetail: SafeFC<EncounterDetailProps> = ({ encounters }) => {
   const [selectedId, setSelectedId] = useState('');
   const [state, setState] = useState<DetailState>(EMPTY_STATE);
   const [activeTab, setActiveTab] = useState<'summary' | 'analysis' | 'refusals'>('summary');

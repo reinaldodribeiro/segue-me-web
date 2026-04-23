@@ -6,19 +6,20 @@ description: "Pattern for forms in the segue-me frontend. Covers local state man
   showing a delete confirmation, or the user says 'add form', 'create form', 'validate input',
   'form with errors', 'submit handler', 'delete confirmation'."
 ---
-<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
+<!-- mustard:generated at:2026-04-23T00:00:00Z role:ui -->
 
 # Form Pattern
 
-Forms use three local state variables: field values (individual `useState` per field), `errors` record, and `submitting` boolean. A `validate()` function populates `errors` and returns a boolean. Delete confirmations use a separate `confirmDelete` boolean.
+Forms use three local state variables: field values (individual `useState` per field), `errors` record, and `submitting` boolean. A `validate()` function populates `errors` and returns a boolean. Delete confirmations use a separate `confirmDelete` boolean. All form components use `SafeFC`.
 
 ## Pattern
 
 Rules:
+- Declare form component as `const NewX: SafeFC = () => {}` + `export default NewX`
 - Clear individual field error on change: `setErrors(p => ({ ...p, fieldName: undefined }))`
 - Disable submit button while `submitting` is true
 - Use `useErrorHandler().handleError(err)` in catch to map HTTP errors to toasts
-- Use `useToast()` for success notifications
+- Use `useToast()` for success notifications (access via hook from `src/hooks/useToast.ts`)
 - Use `initializedRef` guard in Detail forms to prevent re-init after cache invalidation
 - Use `confirmDelete` boolean state (not `window.confirm()`) for delete confirmations
 - Validate before submit: `if (!validate()) return`
@@ -26,28 +27,34 @@ Rules:
 ## Example
 
 ```tsx
-const [name, setName] = useState('');
-const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-const [submitting, setSubmitting] = useState(false);
+const NewPerson: SafeFC = () => {
+  const [name, setName] = useState('');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const { handleError } = useErrorHandler();
+  const { toast } = useToast();
 
-function validate(): boolean {
-  const e: typeof errors = {};
-  if (!name.trim()) e.name = 'Nome obrigatorio';
-  setErrors(e);
-  return Object.keys(e).length === 0;
-}
+  function validate(): boolean {
+    const e: typeof errors = {};
+    if (!name.trim()) e.name = 'Nome obrigatorio';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  if (!validate()) return;
-  setSubmitting(true);
-  try {
-    await PersonService.save({ name });
-    toast({ title: 'Salvo!', variant: 'success' });
-    router.push('/app/people');
-  } catch (err) { handleError(err, 'NewPerson'); }
-  finally { setSubmitting(false); }
-}
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
+    setSubmitting(true);
+    try {
+      await PersonService.save({ name });
+      toast({ title: 'Salvo!', variant: 'success' });
+    } catch (err) { handleError(err, 'NewPerson'); }
+    finally { setSubmitting(false); }
+  }
+  return <form onSubmit={handleSubmit}>...</form>;
+};
+
+export default NewPerson;
 ```
 Ref: `src/features/People/New/index.tsx`
 

@@ -6,7 +6,7 @@ import { ToastItemProps, ToastViewportProps } from './types';
 import { variantStyles } from './styles';
 import { DEFAULT_DURATION_MS } from './constants';
 
-const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
+const ToastItem: SafeFC<ToastItemProps> = ({ toast, onDismiss }) => {
   const { id, title, description, variant = 'info', durationMs = DEFAULT_DURATION_MS } = toast;
   const styles = variantStyles[variant];
 
@@ -36,7 +36,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
   );
 };
 
-const ToastViewport: React.FC<ToastViewportProps> = ({ toasts, onDismiss }) => {
+const ToastViewport: SafeFC<ToastViewportProps> = ({ toasts, onDismiss }) => {
   if (!toasts.length) return null;
 
   return (

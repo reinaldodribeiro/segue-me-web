@@ -3,7 +3,6 @@
 import React, {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -15,7 +14,7 @@ import { TutorialContextValue, TutorialProviderProps, TutorialStep } from '@/typ
 import { TUTORIALS, normalizeTutorialRoute } from '@/constants/tutorials';
 import UserService from '@/services/api/UserService';
 
-const TutorialContext = createContext<TutorialContextValue | null>(null);
+export const TutorialContext = createContext<TutorialContextValue | null>(null);
 
 export const TutorialProvider: React.FC<TutorialProviderProps> = ({ children }) => {
   const { user } = useAuth();
@@ -238,32 +237,34 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({ children }) 
 
   // ── Context value ─────────────────────────────────────────────────────────
 
-  const value: TutorialContextValue = {
-    isActive,
-    activeRoute,
-    currentStep,
-    filteredSteps,
-    targetRect,
-    startTutorial,
-    nextStep,
-    prevStep,
-    dismiss,
-    markSeenAndDismiss,
-    resetTutorial,
-    hasSeenTutorial,
-    hasTutorialForRoute,
-    seenLoaded,
-  };
+  const valueData: TutorialContextValue = useMemo(
+    () => ({
+      isActive,
+      activeRoute,
+      currentStep,
+      filteredSteps,
+      targetRect,
+      startTutorial,
+      nextStep,
+      prevStep,
+      dismiss,
+      markSeenAndDismiss,
+      resetTutorial,
+      hasSeenTutorial,
+      hasTutorialForRoute,
+      seenLoaded,
+    }),
+    [
+      isActive, activeRoute, currentStep, filteredSteps, targetRect,
+      startTutorial, nextStep, prevStep, dismiss, markSeenAndDismiss,
+      resetTutorial, hasSeenTutorial, hasTutorialForRoute, seenLoaded,
+    ],
+  );
 
   return (
-    <TutorialContext.Provider value={value}>
+    <TutorialContext.Provider value={valueData}>
       {children}
     </TutorialContext.Provider>
   );
 };
 
-export function useTutorialContext(): TutorialContextValue {
-  const ctx = useContext(TutorialContext);
-  if (!ctx) throw new Error('useTutorialContext must be used within TutorialProvider');
-  return ctx;
-}

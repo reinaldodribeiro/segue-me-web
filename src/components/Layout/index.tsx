@@ -1,12 +1,12 @@
-import React from 'react';
-import { Sidebar } from '@/components/Layout/Sidebar';
-import { MobileDrawer } from '@/components/Layout/MobileDrawer';
+import { memo } from 'react';
+import Sidebar from '@/components/Layout/Sidebar';
+import MobileDrawer from '@/components/Layout/MobileDrawer';
 import Header from '@/components/Layout/Header';
 import { useLayout } from '@/hooks/useLayout';
 import { cn } from '@/utils/helpers';
 import { LayoutProps } from './types';
 
-const Layout: React.FC<LayoutProps> = React.memo(({ children }) => {
+const Layout: SafeFC<LayoutProps> = memo(({ children }) => {
   const { isSidebarCollapsed } = useLayout();
 
   return (

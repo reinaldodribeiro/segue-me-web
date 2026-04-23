@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
@@ -11,7 +11,7 @@ import EncounterService from '@/services/api/EncounterService';
 import { useEncounterTeams as useEncounterTeamsQuery, useEncounterAvailablePeople } from '@/lib/query/hooks/useEncounters';
 import { queryKeys } from '@/lib/query/keys';
 
-interface EncounterTeamsContextValue {
+export interface EncounterTeamsContextData {
   encounterId: string;
   // Data
   teams: Team[];
@@ -47,13 +47,7 @@ interface EncounterTeamsContextValue {
   updateMemberStatus: (memberId: string, status: TeamMemberStatus, refusalReason?: string) => Promise<void>;
 }
 
-const EncounterTeamsContext = createContext<EncounterTeamsContextValue | null>(null);
-
-export function useEncounterTeams() {
-  const ctx = useContext(EncounterTeamsContext);
-  if (!ctx) throw new Error('useEncounterTeams must be used within EncounterTeamsProvider');
-  return ctx;
-}
+export const EncounterTeamsContext = createContext<EncounterTeamsContextData | null>(null);
 
 export function EncounterTeamsProvider({
   encounterId,
@@ -110,14 +104,14 @@ export function EncounterTeamsProvider({
   // Reset worked-in-team filter when selected team changes
   useEffect(() => { setFilterWorkedInTeam(false); }, [selectedTeamId]);
 
-  function invalidateAll() {
+  const invalidateAll = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: queryKeys.encounters.teams(encounterId) });
     queryClient.invalidateQueries({ queryKey: queryKeys.encounters.availablePeople(encounterId) });
-  }
+  }, [queryClient, encounterId]);
 
   // — Actions —
 
-  async function syncTeams() {
+  const syncTeams = useCallback(async () => {
     setSyncing(true);
     try {
       await EncounterService.syncTeams(encounterId);
@@ -128,9 +122,9 @@ export function EncounterTeamsProvider({
     } finally {
       setSyncing(false);
     }
-  }
+  }, [encounterId, invalidateAll, toast, handleError]);
 
-  async function addMember(personId: string, role: TeamMemberRole, teamId?: string) {
+  const addMember = useCallback(async (personId: string, role: TeamMemberRole, teamId?: string) => {
     const target = teamId ?? selectedTeamId;
     if (!target) return;
 
@@ -166,9 +160,9 @@ export function EncounterTeamsProvider({
     } catch (err: unknown) {
       handleError(err, 'addMember()');
     }
-  }
+  }, [selectedTeamId, available, teams, toast, handleError, invalidateAll]);
 
-  async function removeMember(memberId: string, reason?: string) {
+  const removeMember = useCallback(async (memberId: string, reason?: string) => {
     try {
       await EncounterService.removeMember(memberId, reason);
       invalidateAll();
@@ -176,16 +170,16 @@ export function EncounterTeamsProvider({
     } catch (err: unknown) {
       handleError(err, 'removeMember()');
     }
-  }
+  }, [handleError, invalidateAll, toast]);
 
-  async function updateMemberStatus(memberId: string, status: TeamMemberStatus, refusalReason?: string) {
+  const updateMemberStatus = useCallback(async (memberId: string, status: TeamMemberStatus, refusalReason?: string) => {
     try {
       await EncounterService.updateMemberStatus(memberId, status, refusalReason);
       queryClient.invalidateQueries({ queryKey: queryKeys.encounters.teams(encounterId) });
     } catch (err: unknown) {
       handleError(err, 'updateMemberStatus()');
     }
-  }
+  }, [handleError, queryClient, encounterId]);
 
   // — Derived stats —
   const totalSlots     = teams.reduce((a, t) => a + t.max_members, 0);
@@ -203,8 +197,8 @@ export function EncounterTeamsProvider({
     return true;
   });
 
-  return (
-    <EncounterTeamsContext.Provider value={{
+  const valueData: EncounterTeamsContextData = useMemo(
+    () => ({
       encounterId,
       teams, available, filteredAvailable, loadingTeams, loadingPeople,
       isFetchingNextPage, hasNextPage, totalAvailable,
@@ -213,7 +207,21 @@ export function EncounterTeamsProvider({
       totalSlots, totalFilled, totalConfirmed, teamsComplete,
       setSelectedTeamId, setSearchPeople, setFilterType, setFilterWorkedInTeam,
       syncTeams, addMember, removeMember, updateMemberStatus,
-    }}>
+    }),
+    [
+      encounterId,
+      teams, available, filteredAvailable, loadingTeams, loadingPeople,
+      isFetchingNextPage, hasNextPage, totalAvailable,
+      fetchNextPage, syncing,
+      selectedTeamId, selectedTeam, searchPeople, filterType, filterWorkedInTeam,
+      totalSlots, totalFilled, totalConfirmed, teamsComplete,
+      setSelectedTeamId, setSearchPeople, setFilterType, setFilterWorkedInTeam,
+      syncTeams, addMember, removeMember, updateMemberStatus,
+    ],
+  );
+
+  return (
+    <EncounterTeamsContext.Provider value={valueData}>
       {children}
     </EncounterTeamsContext.Provider>
   );

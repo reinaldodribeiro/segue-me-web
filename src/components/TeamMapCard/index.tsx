@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Crown, Users } from 'lucide-react';
 import { resolveTeamIcon } from '@/components/TeamIconPicker';
-import { useEncounterTeams } from '@/context/EncounterTeamsContext';
+import { useEncounterTeams } from '@/hooks/useEncounterTeams';
 import MemberAvatar from '@/components/MemberAvatar';
 import EmptySlot from '@/components/EmptySlot';
 import AddMemberModal from '@/features/Encounters/Teams/AddMemberModal';
@@ -11,7 +11,7 @@ import { TeamMemberRole } from '@/interfaces/Encounter';
 import { TeamMapCardProps } from './types';
 import DroppableSection from './DroppableSection';
 
-const TeamMapCard: React.FC<TeamMapCardProps> = ({ team }) => {
+const TeamMapCard: SafeFC<TeamMapCardProps> = ({ team }) => {
   const { selectedTeamId, setSelectedTeamId } = useEncounterTeams();
   const isSelected = selectedTeamId === team.id;
   const [slotModal, setSlotModal] = useState<TeamMemberRole | null>(null);

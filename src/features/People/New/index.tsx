@@ -64,7 +64,7 @@ const SACRAMENT_LABELS: Record<string, string> = {
   crisma: 'Crisma',
 };
 
-const NewPerson: React.FC = () => {
+const NewPerson: SafeFC = () => {
   useTutorial();
   const router = useRouter();
   const queryClient = useQueryClient();

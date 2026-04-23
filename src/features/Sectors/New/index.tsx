@@ -26,7 +26,7 @@ interface FormErrors {
   name?: string;
 }
 
-const NewSector: React.FC = () => {
+const NewSector: SafeFC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();

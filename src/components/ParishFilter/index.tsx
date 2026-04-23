@@ -6,7 +6,7 @@ import type { ParishFilterProps } from './types';
 const sel =
   'text-sm bg-input-bg border border-input-border text-input-text rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40 min-w-[160px]';
 
-const ParishFilter: React.FC<ParishFilterProps> = ({
+const ParishFilter: SafeFC<ParishFilterProps> = ({
   dioceseId, sectorId, parishId,
   setDioceseId, setSectorId, setParishId,
   dioceses, sectors, parishes,

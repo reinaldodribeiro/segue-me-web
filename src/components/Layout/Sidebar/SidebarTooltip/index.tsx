@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { SidebarTooltipProps } from './types';
 
-const SidebarTooltip: React.FC<SidebarTooltipProps> = ({ children, label }) => {
+const SidebarTooltip: SafeFC<SidebarTooltipProps> = ({ children, label }) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLDivElement>(null);

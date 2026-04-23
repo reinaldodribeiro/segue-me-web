@@ -2,7 +2,7 @@
 
 import { StatCardProps } from './types';
 
-const StatCard: React.FC<StatCardProps> = ({ icon, label, value, iconBg, sub }) => {
+const StatCard: SafeFC<StatCardProps> = ({ icon, label, value, iconBg, sub }) => {
   return (
     <div className="bg-panel border border-border rounded-xl p-4 flex items-start gap-3">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>

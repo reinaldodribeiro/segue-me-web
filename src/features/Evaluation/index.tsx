@@ -42,7 +42,7 @@ function clearSession(token: string) {
   }
 }
 
-const EvaluationPage: React.FC<EvaluationPageProps> = ({ token }) => {
+const EvaluationPage: SafeFC<EvaluationPageProps> = ({ token }) => {
   const [step, setStep] = useState<Step>('pin');
   const [sessionToken, setSessionToken] = useState('');
   const [formData, setFormData] = useState<EvaluationFormData | null>(null);

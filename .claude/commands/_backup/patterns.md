@@ -1,140 +1,107 @@
-<!-- mustard:generated at:2026-04-01T20:20:04Z role:ui -->
+<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
 
 # Patterns: Frontend (ui)
 
-> Recurring implementation patterns with concrete file references.
+> Recurring code patterns with file references. Focus on performance, security, and maintainability.
 
-## 1. Page Wrapper Pattern
+## 1. Page Wrapper + PermissionGuard
 
-Every protected page is a thin wrapper applying `PermissionGuard`:
-```tsx
-'use client';
-import PermissionGuard from '@/components/Auth/PermissionGuard';
-import PeopleList from '@/features/People/List';
-export default function Page() {
-  return <PermissionGuard roles={['parish_admin', 'coordinator']}><PeopleList /></PermissionGuard>;
-}
-```
-Ref: `src/app/app/people/page.tsx`
+Every protected page is a thin `'use client'` wrapper: `<PermissionGuard roles={[...]}><Feature /></PermissionGuard>`.
+Ref: `src/app/app/people/page.tsx`, `src/app/app/encounters/page.tsx`
 
 ## 2. CrudService Extension
 
-Extend `CrudService<T, P>` and implement `baseUrl()`. Override `update()` with `api.put()` when backend expects PUT:
-```ts
-class PersonService extends CrudService<Person, PersonPayload> {
-  protected baseUrl() { return 'people'; }
-  put(id: string, data: Partial<PersonPayload>) { return api.put(`people/${id}`, data); }
-}
-```
-Ref: `src/services/api/PersonService.ts`, `src/services/api/CrudService.ts`
+Extend `CrudService<T, P>` with `baseUrl()`. Override with `api.put()` for updates (Laravel expects PUT, not PATCH). Export as singleton.
+Ref: `src/services/api/PersonService.ts`, `src/services/api/EncounterService.ts`, `src/services/api/CrudService.ts`
 
-## 3. TanStack Query Hook
+## 3. TanStack Query Hooks
 
-One hook file per entity in `src/lib/query/hooks/`. Keys from `queryKeys` factory. Use `placeholderData: (prev) => prev` on list queries:
-```ts
-export function usePersonList(params: Record<string, unknown>) {
-  return useQuery({
-    queryKey: queryKeys.persons.list(params),
-    queryFn: () => PersonService.paginated(params).then((r) => ({ data: r.data.data, meta: r.data.meta })),
-    placeholderData: (prev) => prev,
-  });
-}
-```
+Dedicated hooks per entity in `src/lib/query/hooks/`. Use `queryKeys` factory for all cache ops. `placeholderData: (prev) => prev` for seamless pagination transitions.
 Ref: `src/lib/query/hooks/usePersons.ts`, `src/lib/query/keys.ts`
 
-## 4. Mutation + Invalidate Pattern
+## 4. Mutation + Cache Invalidation
 
-After mutations, invalidate cache keys — never manually set state:
-```ts
-const queryClient = useQueryClient();
-return useMutation({
-  mutationFn: (id: string) => PersonService.delete(id),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.persons.all }),
-});
-```
-Ref: `src/lib/query/hooks/usePersons.ts`
+After mutations, invalidate queries instead of manual state updates. Invalidate both detail and list keys for consistency.
+Ref: `src/lib/query/hooks/usePersons.ts` (`useUpdatePerson`, `useDeletePerson`)
 
-## 5. Form Initialization Guard (initializedRef)
+## 5. initializedRef Guard
 
-Prevent re-initializing form from cache after mutation:
-```ts
-const initializedRef = useRef<string | null>(null);
-useEffect(() => {
-  if (!data || initializedRef.current === id) return;
-  initializedRef.current = id;
-  setName(data.name);
-}, [data, id]);
-```
-Ref: `src/features/People/Detail/index.tsx` (pattern from CLAUDE.md)
+Prevent re-initializing form state after cache invalidation. Track last-initialized ID via `useRef<string | null>(null)`.
+Ref: `src/features/People/Detail/index.tsx` (lines 102-119)
 
 ## 6. Debounced Search + Page Reset
 
-Use `useDebounce(search, 400)`. Reset `page` to `1` on filter change:
-```ts
-const debouncedSearch = useDebounce(search, 400);
-const listParams: Record<string, unknown> = { per_page: 30, page };
-if (debouncedSearch) listParams.search = debouncedSearch;
-```
-Ref: `src/features/People/List/index.tsx`
+`useDebounce(search, 400)` for search inputs. Always reset `page` to `1` when search or filters change.
+Ref: `src/features/People/List/index.tsx` (lines 71, 88-109)
 
 ## 7. Hierarchy Cascade Selectors
 
-Diocese → Sector → Parish cascade via `useHierarchyCascade` hook:
-```ts
-const { dioceses, sectors, parishes } = useHierarchyCascade({ dioceseId, sectorId });
-```
-Lower-level selectors are disabled until parent is selected. Ref: `src/hooks/useHierarchyCascade.ts`
+`useHierarchyCascade` manages diocese -> sector -> parish dependent queries. Role determines starting point. 5min staleTime cache.
+Ref: `src/hooks/useHierarchyCascade.ts`, `src/lib/query/hooks/useHierarchy.ts`
 
-## 8. Error Handling Pattern
+## 8. Error Handler Hook
 
-Use `useErrorHandler().handleError()` in catch blocks — maps HTTP status codes to toast messages:
-```ts
-const { handleError } = useErrorHandler();
-try { await PersonService.save(payload); }
-catch (err) { handleError(err, 'NewPerson'); }
-```
+`useErrorHandler().handleError(err, context?)` routes by HTTP status: 401->logout, 403/404/409/422/500->toast.
 Ref: `src/hooks/useErrorHandler.ts`
 
-## 9. Permission Hook Usage
+## 9. Dynamic Import for Heavy Components
 
-Always use `usePermissions()` — never access `user.roles` directly:
-```ts
-const { isSuperAdmin, hasAnyRole, canAccess } = usePermissions();
-```
+Recharts loaded via `next/dynamic` with `ssr: false` and skeleton loading. Reduces initial bundle for Dashboard.
+Ref: `src/features/Dashboard/index.tsx` (lines 17-24)
+
+## 10. Auth Token Dual Storage
+
+Token in localStorage (client) AND synced to non-HttpOnly cookie (Edge Middleware). `syncAuthCookie()` runs on token change.
+Ref: `src/context/AuthContext.tsx` (lines 40-42), `src/utils/authCookie.ts`
+
+## 11. Permission Normalization
+
+Spatie returns roles as objects or strings. `usePermissions()` normalizes to `UserRole[]`, memoizes, exposes `hasRole()`, `hasAnyRole()`, `canAccess()`, and convenience flags.
 Ref: `src/hooks/usePermissions.ts`, `src/constants/permissions.ts`
 
-## 10. Enum Label Maps
+## 12. EncounterTeams Context Pattern
 
-Always use companion label maps for display — never hardcode display strings:
-```ts
-import { PERSON_TYPE_LABELS } from '@/interfaces/Person';
-<span>{PERSON_TYPE_LABELS[person.type]}</span>
-```
-Ref: `src/interfaces/Person.ts`
+Complex team-building uses dedicated context wrapping TanStack Query data, filters, and mutation actions. Avoids prop drilling across 6+ DnD components.
+Ref: `src/context/EncounterTeamsContext.tsx`
 
-## 11. Polling Pattern (Import Status)
+## 13. Polling Pattern (Import Status)
 
-`refetchInterval` returns `false` when done/failed to stop polling:
-```ts
-return useQuery({
-  queryKey: queryKeys.importStatus.byKey(cacheKey!),
-  queryFn: () => PersonService.importStatus(cacheKey!).then((r) => r.data),
-  enabled: !!cacheKey,
-  refetchInterval: (query) => {
-    const status = query.state.data?.status;
-    if (status === 'done' || status === 'failed') return false;
-    return 2000;
-  },
-});
-```
-Ref: `src/lib/query/hooks/usePersons.ts`
+`refetchInterval` returns `false` when status is terminal (`done`/`failed`). Interval: 2000ms.
+Ref: `src/lib/query/hooks/usePersons.ts` (`useImportStatus`)
 
-## 12. Duplicate Detection (409 Conflict)
+## 14. Duplicate Detection (409 Conflict)
 
-POST returns 409 with `{ data: { duplicates: [...] } }`. Show warning modal; pass `force: true` to bypass:
-```ts
-} catch (err) {
-  if ((err as { status?: number })?.status === 409) setDuplicates(data.duplicates);
-}
-```
-Ref: `src/features/People/New/index.tsx`
+POST returns 409 with `{ duplicates: [...] }`. UI shows warning modal; `force: true` bypasses check.
+Ref: `src/features/People/New/index.tsx` (lines 174-228)
+
+## 15. Storage URL Helper
+
+Always use `storageUrl(path)` for backend-stored images. Never interpolate env var directly.
+Ref: `src/utils/helpers.ts`
+
+## 16. Enum Label Maps
+
+Every enum has a `*_LABELS` companion map for display. Never hardcode Portuguese strings inline.
+Ref: `src/interfaces/Person.ts` (`PERSON_TYPE_LABELS`)
+
+## Anti-Patterns Detected
+
+### AP1. Dashboard uses useEffect+setState instead of TanStack Query [Performance]
+Loads encounters and people stats via raw `Promise.all` + `setState`. Bypasses query caching, deduplication, background refetch, and stale management. Should use custom query hooks.
+Ref: `src/features/Dashboard/index.tsx` (lines 46-82)
+
+### AP2. NewPerson loads data outside query layer [Performance]
+Parish skills (line 107) and movements (line 114) fetched via `useEffect` + `setState` instead of query hooks. Misses cache sharing when navigating back.
+Ref: `src/features/People/New/index.tsx` (lines 106-129)
+
+### AP3. Auth token in non-HttpOnly cookie [Security]
+JWT stored in client-accessible cookie for Edge Middleware. XSS could steal the token. Documented trade-off with planned migration to HttpOnly.
+Ref: `src/utils/authCookie.ts`
+
+### AP4. Auth token parsed from localStorage without validation [Security]
+Token is `JSON.parse(localStorage.getItem('authToken'))` with no expiry check, no format validation. Expired tokens cause unnecessary API calls before 401 redirect.
+Ref: `src/config/api.ts` (lines 24-26)
+
+### AP5. No React.memo on list item renderers [Performance]
+`SortableTable` renders cell functions inline. Large lists re-render all rows on any parent state change. Could benefit from memoized row components.
+Ref: `src/features/People/List/index.tsx` (lines 293-408)

@@ -8,7 +8,7 @@ import { TeamEvaluationToken, EVALUATION_STATUS_LABELS } from '@/interfaces/Eval
 import { resolveTeamIcon } from '@/components/TeamIconPicker';
 import { EvaluationProgressProps } from './types';
 
-const EvaluationProgress: React.FC<EvaluationProgressProps> = ({
+const EvaluationProgress: SafeFC<EvaluationProgressProps> = ({
   encounterId,
   isCompleted,
 }) => {

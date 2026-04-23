@@ -30,7 +30,7 @@ import { storageUrl } from "@/utils/helpers";
 import { useParishColor } from "@/hooks/useParishColor";
 import { useAuth } from "@/hooks/useAuth";
 
-const ParishDetail: React.FC = () => {
+const ParishDetail: SafeFC = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { toast } = useToast();

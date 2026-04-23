@@ -15,7 +15,7 @@ const BUCKETS = [
 
 const BUCKET_COLORS = ['#94a3b8', '#60a5fa', '#8b5cf6', '#7c3aed', '#f59e0b'];
 
-const ScoreChart: React.FC<ScoreChartProps> = ({ people }) => {
+const ScoreChart: SafeFC<ScoreChartProps> = ({ people }) => {
   const data = BUCKETS.map((b, i) => ({
     label: b.label,
     count: people.filter((p) => p.engagement_score >= b.min && p.engagement_score <= b.max).length,

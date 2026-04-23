@@ -2,7 +2,8 @@
 
 import React, {
   createContext,
-  useContext,
+  useCallback,
+  useMemo,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useParishFilter, ParishFilterState } from '@/hooks/useParishFilter';
@@ -24,7 +25,7 @@ export interface AnalyticsContextData {
 
 /* ─── context ────────────────────────────────────────────────────── */
 
-const AnalyticsContext = createContext<AnalyticsContextData | null>(null);
+export const AnalyticsContext = createContext<AnalyticsContextData | null>(null);
 
 /* ─── provider ───────────────────────────────────────────────────── */
 
@@ -33,26 +34,22 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const { scopedParishIds } = filter;
   const queryClient = useQueryClient();
 
-  const sortedIds = [...scopedParishIds].sort();
+  const sortedIds = useMemo(() => [...scopedParishIds].sort(), [scopedParishIds]);
   const { data: engagement = null, isLoading: loadingEngagement } = useEngagementReport(scopedParishIds);
 
-  function refreshEngagement() {
+  const refreshEngagement = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: queryKeys.engagement.report(sortedIds) });
-  }
+  }, [queryClient, sortedIds]);
+
+  const valueData: AnalyticsContextData = useMemo(
+    () => ({ filter, engagement, loadingEngagement, refreshEngagement }),
+    [filter, engagement, loadingEngagement, refreshEngagement],
+  );
 
   return (
-    <AnalyticsContext.Provider
-      value={{ filter, engagement, loadingEngagement, refreshEngagement }}
-    >
+    <AnalyticsContext.Provider value={valueData}>
       {children}
     </AnalyticsContext.Provider>
   );
 }
 
-/* ─── hook ───────────────────────────────────────────────────────── */
-
-export function useAnalytics(): AnalyticsContextData {
-  const ctx = useContext(AnalyticsContext);
-  if (!ctx) throw new Error('useAnalytics must be used inside <AnalyticsProvider>');
-  return ctx;
-}

@@ -1,10 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Download, Loader2, Star, TrendingUp, Users, Calendar } from 'lucide-react';
 import PersonService from '@/services/api/PersonService';
-import { useAnalytics } from '@/context/AnalyticsContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { useEncounterList } from '@/lib/query/hooks/useEncounters';
 import ParishFilter from '@/components/ParishFilter';
 import EncounterDetail from './EncounterDetail';
@@ -32,7 +32,7 @@ function Skeleton({ className }: { className: string }) {
 }
 
 function StatCard({ icon, label, value, sub, iconBg }: {
-  icon: React.ReactNode; label: string; value: React.ReactNode; sub?: string; iconBg: string;
+  icon: ReactNode; label: string; value: ReactNode; sub?: string; iconBg: string;
 }) {
   return (
     <div className="bg-panel border border-border rounded-xl p-4 flex items-start gap-3">
@@ -48,7 +48,7 @@ function StatCard({ icon, label, value, sub, iconBg }: {
 
 /* ─── main component ─────────────────────────────────────────────── */
 
-const Reports: React.FC = () => {
+const Reports: SafeFC = () => {
   useTutorial();
   const { filter, engagement, loadingEngagement } = useAnalytics();
   const { selectedParishId, selectedParishName, loadingScope, isAboveParish } = filter;

@@ -1,6 +1,6 @@
 import { FeedbackMsgProps } from './types';
 
-const FeedbackMsg: React.FC<FeedbackMsgProps> = ({ error, success }) => {
+const FeedbackMsg: SafeFC<FeedbackMsgProps> = ({ error, success }) => {
   if (error) {
     return (
       <p className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">

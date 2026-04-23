@@ -26,7 +26,7 @@ interface Props {
   selectedParishName: string | null;
 }
 
-const ReportsChartsBundle: React.FC<Props> = ({
+const ReportsChartsBundle: SafeFC<Props> = ({
   engagement,
   loadingEngagement,
   donutData,

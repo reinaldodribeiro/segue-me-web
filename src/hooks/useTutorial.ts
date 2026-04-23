@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { useTutorialContext } from '@/context/TutorialContext';
+import { useTutorialContext } from '@/hooks/useTutorialContext';
 
 /**
  * Call once at the top of any feature component to enable auto-triggering.

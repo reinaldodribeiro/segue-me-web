@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
-interface LayoutContextType {
+export interface LayoutContextData {
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
   isMobileDrawerOpen: boolean;
@@ -10,7 +10,7 @@ interface LayoutContextType {
   closeMobileDrawer: () => void;
 }
 
-export const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+export const LayoutContext = createContext<LayoutContextData | undefined>(undefined);
 
 export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -32,10 +32,13 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const openMobileDrawer = useCallback(() => setIsMobileDrawerOpen(true), []);
   const closeMobileDrawer = useCallback(() => setIsMobileDrawerOpen(false), []);
 
+  const valueData: LayoutContextData = useMemo(
+    () => ({ isSidebarCollapsed, toggleSidebar, isMobileDrawerOpen, openMobileDrawer, closeMobileDrawer }),
+    [isSidebarCollapsed, toggleSidebar, isMobileDrawerOpen, openMobileDrawer, closeMobileDrawer],
+  );
+
   return (
-    <LayoutContext.Provider
-      value={{ isSidebarCollapsed, toggleSidebar, isMobileDrawerOpen, openMobileDrawer, closeMobileDrawer }}
-    >
+    <LayoutContext.Provider value={valueData}>
       {children}
     </LayoutContext.Provider>
   );

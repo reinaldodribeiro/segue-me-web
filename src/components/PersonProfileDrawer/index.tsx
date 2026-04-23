@@ -16,7 +16,7 @@ import { resolveTeamIcon } from '@/components/TeamIconPicker';
 import { PersonProfileDrawerProps } from './types';
 import { PROFILE_TYPE_COLOR, PROFILE_ENGAGEMENT_CONFIG } from './constants';
 
-const PersonProfileDrawer: React.FC<PersonProfileDrawerProps> = ({
+const PersonProfileDrawer: SafeFC<PersonProfileDrawerProps> = ({
   person,
   experiences,
   historyData,

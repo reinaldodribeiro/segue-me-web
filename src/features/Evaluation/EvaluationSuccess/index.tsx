@@ -1,6 +1,6 @@
 import { CheckCircle2 } from 'lucide-react';
 
-const EvaluationSuccess: React.FC = () => {
+const EvaluationSuccess: SafeFC = () => {
   return (
     <div className="bg-panel border border-border rounded-xl p-8 text-center space-y-4">
       <div className="flex justify-center">

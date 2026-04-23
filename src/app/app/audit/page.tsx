@@ -5,7 +5,7 @@ import AuditList from '@/features/Audit/List';
 
 export default function AuditPage() {
   return (
-    <PermissionGuard roles={['super_admin', 'diocese_admin', 'sector_admin', 'parish_admin']}>
+    <PermissionGuard roles={['super_admin', 'diocese_admin']}>
       <AuditList />
     </PermissionGuard>
   );

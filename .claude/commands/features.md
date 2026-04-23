@@ -1,4 +1,4 @@
-<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
+<!-- mustard:generated at:2026-04-23T00:00:00Z role:ui -->
 
 # Features: Frontend (ui)
 
@@ -14,7 +14,7 @@
 | Movements | `features/Movements/` | Medium | List, New, Detail (with SortableTeamRow, TeamForm) | diocese_admin+ |
 | Dioceses | `features/Dioceses/` | Low | List, New, Detail | super_admin |
 | Sectors | `features/Sectors/` | Low | List, New, Detail | diocese_admin+ |
-| Parishes | `features/Parishes/` | Medium | List, New, Detail | sector_admin+ |
+| Parishes | `features/Parishes/` | Medium | List, New, Detail, Settings | sector_admin+ |
 | Users | `features/Users/` | Medium | List, New, Detail | parish_admin+ |
 | Auth | `features/Auth/` | Low | Login, Layout | public |
 | Evaluation | `features/Evaluation/` | Medium | PinVerification, EvaluationForm, Success | public (PIN auth) |
@@ -29,9 +29,11 @@ Standard feature folder: `src/features/{Name}/`
 - `List/index.tsx` -- paginated list with filters, sorting
 - `New/index.tsx` -- create form with validation
 - `Detail/index.tsx` -- edit form with `initializedRef` guard
+- `Settings/index.tsx` -- feature-specific settings (e.g. Parishes)
 - `types.ts` -- feature-specific TypeScript types
 - Sub-components as nested folders with `index.tsx` + `types.ts`
 
+All feature components use `const X: SafeFC = () => {}` + `export default X`.
 Page wrappers in `src/app/app/{name}/page.tsx` -- thin `'use client'` wrapper with PermissionGuard.
 Ref: `src/app/app/people/page.tsx`
 
@@ -52,7 +54,7 @@ Ref: `src/app/app/people/page.tsx`
 | People List | Server-side pagination + TanStack Query | GOOD: offloads to backend, cached |
 | Encounters List | Server-side pagination + TanStack Query | GOOD: same pattern |
 | Dioceses List | Full load + client-side filter | OK: small dataset (~tens) |
-| Dashboard | `useEffect` + `setState` (not TanStack Query) | CONCERN: bypasses cache |
+| Dashboard | `useDashboardStats` + TanStack Query | GOOD: uses query cache |
 | Encounter Teams | TanStack Query for teams + available people | GOOD: cached, auto-invalidated |
 | Hierarchy Cascade | Waterfall: diocese -> sector -> parish | CONCERN: sequential API calls |
 | Reports | `useEngagementReport` via AnalyticsContext | GOOD: shared cache |
@@ -62,14 +64,8 @@ Ref: `src/app/app/people/page.tsx`
 1. **Hierarchy waterfall for super_admin** -- Loading all parishes requires diocese -> sector -> parish cascade (sequential API calls). Mitigated by 5min React Query staleTime but first load is slow.
    Ref: `src/lib/query/hooks/useHierarchy.ts`
 
-2. **Dashboard bypasses query cache** -- Uses raw `useEffect` + `Promise.all` + `setState` instead of TanStack Query hooks. Loses caching, deduplication, and background refetch.
-   Ref: `src/features/Dashboard/index.tsx` (lines 46-82)
-
-3. **Unbounded available-people list** -- Encounter Teams loads ALL available people in one request. Could be slow for large parishes.
+2. **Unbounded available-people list** -- Encounter Teams loads ALL available people in one request. Could be slow for large parishes.
    Ref: `src/services/api/EncounterService.ts` (`availablePeople`)
-
-4. **NewPerson raw useEffect loading** -- Parish skills and movements loaded via `useEffect` + `setState`, missing cache benefits.
-   Ref: `src/features/People/New/index.tsx` (lines 106-129)
 
 ## Component Inventory (24 shared components)
 
@@ -84,3 +80,8 @@ Ref: `src/services/api/`
 
 AnalyticsContext, AuthContext, EncounterTeamsContext, LayoutContext, ParishColorContext, ThemeContext, ToastContext, TutorialContext
 Ref: `src/context/`
+
+## Hook Inventory (17 hooks)
+
+useAnalytics, useAuth, useClientPagination, useDebounce, useEncounterTeams, useErrorHandler, useHierarchyCascade, useLayout, useLocalStorage, useParishColor, useParishFilter, usePermissions, useTheme, useToast, useTutorial, useTutorialContext
+Ref: `src/hooks/`

@@ -5,7 +5,9 @@ import React, {
   Dispatch,
   ReactNode,
   SetStateAction,
+  useCallback,
   useEffect,
+  useMemo,
 } from "react";
 import { useRouter } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -62,36 +64,42 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       }
     }
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signIn = async (
-    data: LoginPayload,
-    onSuccess?: () => void,
-    onError?: (err: unknown) => void,
-  ) => {
-    try {
-      const res = await AuthService.login(data);
-      if (res.status === 200 && res.data.token) {
-        setToken(res.data.token);
-        setUser(res.data.user);
-        onSuccess?.();
+  const signIn = useCallback(
+    async (
+      data: LoginPayload,
+      onSuccess?: () => void,
+      onError?: (err: unknown) => void,
+    ) => {
+      try {
+        const res = await AuthService.login(data);
+        if (res.status === 200 && res.data.token) {
+          setToken(res.data.token);
+          setUser(res.data.user);
+          onSuccess?.();
+        }
+      } catch (err) {
+        if (onError) {
+          onError(err);
+        } else {
+          console.error(err);
+        }
       }
-    } catch (err) {
-      if (onError) {
-        onError(err);
-      } else {
-        console.error(err);
-      }
-    }
-  };
+    },
+    [setToken, setUser],
+  );
 
-  const signInWithToken = (newToken: string, newUser?: User) => {
-    setToken(newToken);
-    if (newUser) setUser(newUser);
-  };
+  const signInWithToken = useCallback(
+    (newToken: string, newUser?: User) => {
+      setToken(newToken);
+      if (newUser) setUser(newUser);
+    },
+    [setToken, setUser],
+  );
 
-  const logOut = async () => {
+  const logOut = useCallback(async () => {
     try {
       await AuthService.logout();
     } catch {
@@ -101,22 +109,23 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setUser(null);
       router.push("/auth/login");
     }
-  };
+  }, [setToken, setUser, router]);
+
+  const valueData: AuthContextData = useMemo(
+    () => ({
+      isLogged: !!token,
+      token,
+      user,
+      setUser,
+      signIn,
+      signInWithToken,
+      logOut,
+    }),
+    [token, user, setUser, signIn, signInWithToken, logOut],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        isLogged: !!token,
-        token,
-        user,
-        setUser,
-        signIn,
-        signInWithToken,
-        logOut,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={valueData}>{children}</AuthContext.Provider>
   );
 };
 

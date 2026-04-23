@@ -36,7 +36,7 @@ function apiDateToInput(date: string | null): string {
 
 import { EncounterDetailProps } from './types';
 
-const EncounterDetail: React.FC<EncounterDetailProps> = ({ id }) => {
+const EncounterDetail: SafeFC<EncounterDetailProps> = ({ id }) => {
   useTutorial();
   const router = useRouter();
   const { toast } = useToast();

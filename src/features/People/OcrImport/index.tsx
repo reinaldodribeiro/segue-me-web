@@ -61,7 +61,7 @@ export interface OcrImportProps {
 
 const VALID_EXTS = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
 
-const OcrImport: React.FC<OcrImportProps> = ({ onClose }) => {
+const OcrImport: SafeFC<OcrImportProps> = ({ onClose }) => {
   const router = useRouter();
   const [step, setStep] = useState<OcrStep>('idle');
   const [file, setFile] = useState<File | null>(null);

@@ -6,7 +6,7 @@ import Button from '@/components/Button';
 import { storageUrl } from '@/utils/helpers';
 import { EncontristaCardProps } from '../types';
 
-const EncontristaCard: React.FC<EncontristaCardProps> = ({ participant, canEdit, onRemove, onEdit }) => {
+const EncontristaCard: SafeFC<EncontristaCardProps> = ({ participant, canEdit, onRemove, onEdit }) => {
   const [confirmRemove, setConfirmRemove] = useState(false);
 
   const initials = participant.name

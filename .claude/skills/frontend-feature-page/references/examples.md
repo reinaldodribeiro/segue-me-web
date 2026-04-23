@@ -1,4 +1,4 @@
-<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
+<!-- mustard:generated at:2026-04-23T00:00:00Z role:ui -->
 
 # Feature Page Examples
 
@@ -21,14 +21,14 @@ export default function PeoplePage() {
 ## List component structure (key parts)
 Ref: `src/features/People/List/index.tsx`
 ```tsx
-const PeopleList: React.FC = () => {
+const PeopleList: SafeFC = () => {
+  useTutorial();
+  const { isSuperAdmin, isDioceseAdmin } = usePermissions();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<'name' | 'engagement_score'>('name');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const debouncedSearch = useDebounce(search, 400);
 
-  const listParams: Record<string, unknown> = { per_page: 30, page, sort_by: sortBy, sort_dir: sortDir };
+  const listParams: Record<string, unknown> = { per_page: 30, page };
   if (debouncedSearch) listParams.search = debouncedSearch;
 
   const { data, isLoading } = usePersonList(listParams);
@@ -46,12 +46,14 @@ const PeopleList: React.FC = () => {
     </div>
   );
 };
+
+export default PeopleList;
 ```
 
 ## Simple list (client-side filter, no pagination)
 Ref: `src/features/Dioceses/List/index.tsx`
 ```tsx
-const DiocesesList: React.FC = () => {
+const DiocesesList: SafeFC = () => {
   const [search, setSearch] = useState('');
   const { data, isLoading } = useDioceseList();
   const dioceses = data?.data ?? [];
@@ -60,6 +62,8 @@ const DiocesesList: React.FC = () => {
   );
   // Renders HTML <table> directly (no SortableTable needed for small datasets)
 };
+
+export default DiocesesList;
 ```
 
 ## Detail page wrapper with dynamic route param

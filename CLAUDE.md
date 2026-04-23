@@ -31,6 +31,46 @@ NEXT_PUBLIC_STORAGE_URL=http://localhost:8000/storage
 
 This is a **Next.js 16 App Router** frontend for a Parish Meeting Management System ("Segue-me"). It uses TypeScript strict mode, Tailwind CSS with CSS variables for theming, and Axios for API calls.
 
+### Component Declaration (SafeFC)
+
+All components use the global `SafeFC<P>` type declared in `src/types/global.d.ts`. Never import it -- it is globally available.
+
+```ts
+// Standard component
+const PeopleList: SafeFC = () => { ... };
+export default PeopleList;
+
+// Component with props
+const SectionCard: SafeFC<SectionCardProps> = ({ title, children }) => { ... };
+export default SectionCard;
+
+// Memoized component
+const Layout: SafeFC<LayoutProps> = memo(({ children }) => { ... });
+export default Layout;
+```
+
+**Exceptions**: `React.forwardRef` components (Button, Input, Select, PasswordInput) keep their own pattern.
+
+### Context Pattern (Standardized)
+
+All 8 contexts follow the same structure in `src/context/XContext.tsx`:
+1. Export `interface XContextData` with all public fields/functions
+2. Export `const XContext = createContext<XContextData>(...)`
+3. Export `XProvider` with `useCallback` on all functions and `const valueData: XContextData = useMemo(...)`
+4. Context does NOT export a hook
+
+### Context Hook Pattern (Standardized)
+
+Every context hook lives in `src/hooks/useX.ts`:
+```ts
+export function useX(): XContextData {
+  const context = useContext(XContext);
+  if (!context) throw new Error('useX must be used within a XProvider');
+  return context;
+}
+```
+This is the ONLY way to consume context data.
+
 ### Route Structure
 
 All protected pages live under `src/app/app/`. Public auth pages live under `src/app/auth/`. The `app-layout.tsx` file acts as the client-side auth gate — it checks `isLogged` and redirects to `/auth/login` if unauthenticated.
@@ -242,13 +282,28 @@ Every enum type has a companion label map (e.g. `PERSON_TYPE_LABELS`, `ENGAGEMEN
 |------|-------------|
 | `.claude/commands/stack.md` | Technology stack, dependency versions, project structure, build analysis |
 | `.claude/commands/features.md` | Feature inventory, folder conventions, complexity matrix, performance analysis |
-| `.claude/commands/patterns.md` | 16 recurring patterns + 5 anti-patterns with file references |
-| `.claude/commands/guards.md` | DO/DON'T rules for data fetching, performance, security, API, UI, forms, architecture |
+| `.claude/commands/patterns.md` | 20 recurring patterns + 2 anti-patterns with file references |
+| `.claude/commands/guards.md` | DO/DON'T rules for components, contexts, hooks, data fetching, security, API, UI, forms, architecture |
 | `.claude/commands/recipes.md` | Step-by-step implementation recipes with file hierarchies |
 | `.claude/commands/notes.md` | Manual notes (never overwritten by scan) |
 
 ## Guards
 
+### Component Declaration
+- Always declare components as `const X: SafeFC<Props> = () => {}` — never use `React.FC`, `function X()`, or untyped arrows
+- Always export as `export default X` at the bottom — never inline export
+- Use `memo()` named import for memoized components — never `React.memo()`
+- Never convert `React.forwardRef` components (Button, Input, Select, PasswordInput) to SafeFC
+- Never import SafeFC — it is a global type from `src/types/global.d.ts`
+
+### Context & Hooks
+- Context files export only `XContextData` interface, `XContext`, and `XProvider` — never export a hook
+- All context functions must be wrapped in `useCallback`
+- Context value must use `const valueData: XContextData = useMemo(...)` with explicit type
+- Context hooks must live in `src/hooks/useX.ts` with explicit return type `useX(): XContextData`
+- Context hooks must throw if context is null/undefined — never return null
+
+### Data & Security
 - Never access `user.roles` directly — always use `usePermissions()`
 - Never use `useState + useEffect + axios` for data fetching — use TanStack Query hooks
 - After mutations: `queryClient.invalidateQueries()` — never manually update state
@@ -268,10 +323,13 @@ Every enum type has a companion label map (e.g. `PERSON_TYPE_LABELS`, `ENGAGEMEN
 
 ## Recommended Skills
 
+- `frontend-safefc-component` — SafeFC<P> component declaration, export default, memo handling, forwardRef exceptions
+- `frontend-context-pattern` — Context creation with XContextData, useMemo valueData, useCallback, no hook export
+- `frontend-hook-pattern` — Context hooks in /hooks/useX.ts, explicit return type, error boundary
 - `frontend-crud-service` — Extending CrudService, PUT override, custom service methods, blob downloads
 - `frontend-query-hooks` — TanStack Query v5: useQuery, useMutation, keys, polling, parallel queries
 - `frontend-permission-guard` — PermissionGuard, usePermissions, ROUTE_PERMISSIONS map, role normalization
-- `frontend-feature-page` — Feature folder structure, thin page wrappers, list/form checklist
+- `frontend-feature-page` — Feature folder structure, thin page wrappers, SafeFC, list/form checklist
 - `frontend-hierarchy-cascade` — Diocese→Sector→Parish cascade selectors, parallel sector loading
 - `frontend-form-pattern` — Form state, validation, error clearing, delete confirmation, initializedRef
 - `frontend-error-handling` — useErrorHandler hook, HTTP status routing, toast notifications

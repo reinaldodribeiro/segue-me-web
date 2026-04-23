@@ -22,7 +22,7 @@ interface FormErrors {
   name?: string;
 }
 
-const DioceseDetail: React.FC = () => {
+const DioceseDetail: SafeFC = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 

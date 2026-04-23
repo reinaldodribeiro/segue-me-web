@@ -1,6 +1,6 @@
 import { ColorPickerProps } from './types';
 
-const ColorPicker: React.FC<ColorPickerProps> = ({ label, id, value, onChange }) => {
+const ColorPicker: SafeFC<ColorPickerProps> = ({ label, id, value, onChange }) => {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium text-text">

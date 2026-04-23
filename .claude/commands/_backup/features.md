@@ -1,74 +1,86 @@
-<!-- mustard:generated at:2026-04-01T20:20:04Z role:ui -->
+<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
 
 # Features: Frontend (ui)
 
-> Feature inventory for the segue-me Parish Meeting Management System frontend.
+> Feature inventory, folder conventions, complexity matrix, and performance/scalability analysis.
 
-## Protected Features (under /app)
+## Feature Inventory
 
-| Feature | Route(s) | Complexity | Min Role |
-|---------|----------|-----------|---------|
-| Dashboard | `/app` | medium | all |
-| People | `/app/people`, `/new`, `/[id]` | complex | parish_admin, coordinator |
-| Encounters | `/app/encounters`, `/new`, `/[id]`, `/[id]/teams` | complex | all |
-| Movements | `/app/movements`, `/new`, `/[id]`, `/[id]/teams` | complex | diocese_admin+ |
-| Users | `/app/users`, `/new`, `/[id]` | medium | parish_admin+ |
-| Dioceses | `/app/dioceses`, `/new`, `/[id]` | simple | super_admin |
-| Sectors | `/app/sectors`, `/new`, `/[id]` | simple | diocese_admin+ |
-| Parishes | `/app/parishes`, `/new`, `/[id]` | medium | sector_admin+ |
-| Parish Settings | `/app/settings/parish` | medium | parish_admin |
-| Reports | `/app/reports` | medium | all |
-| Audit Logs | `/app/audit` | simple | diocese_admin+ |
-| AI Logs | `/app/ai-logs` | simple | super_admin |
-| Profile | `/app/profile` | simple | all |
-| Evaluation | `/app/avaliacao` | medium | parish_admin+ |
+| Feature | Path | Complexity | Sub-views | Min Role |
+|---------|------|-----------|-----------|----------|
+| Dashboard | `features/Dashboard/` | Medium | StatCard, EngagementChart, ScoreChart | all |
+| People | `features/People/` | High | List, New, Detail, Import, OcrImport | parish_admin, coordinator |
+| Encounters | `features/Encounters/` | High | List, New, Detail, Teams, Encontristas | all (varies by sub-route) |
+| Movements | `features/Movements/` | Medium | List, New, Detail (with SortableTeamRow, TeamForm) | diocese_admin+ |
+| Dioceses | `features/Dioceses/` | Low | List, New, Detail | super_admin |
+| Sectors | `features/Sectors/` | Low | List, New, Detail | diocese_admin+ |
+| Parishes | `features/Parishes/` | Medium | List, New, Detail | sector_admin+ |
+| Users | `features/Users/` | Medium | List, New, Detail | parish_admin+ |
+| Auth | `features/Auth/` | Low | Login, Layout | public |
+| Evaluation | `features/Evaluation/` | Medium | PinVerification, EvaluationForm, Success | public (PIN auth) |
+| Reports | `features/Reports/` | Medium | EncounterReports, EncounterDetail, ChartsBundle | all |
+| Profile | `features/Profile/` | Low | index, TutorialSection | all |
+| Audit | `features/Audit/` | Low | List | diocese_admin+ |
+| AiLogs | `features/AiLogs/` | Low | List | super_admin |
 
-## Feature Folder Convention
+## Folder Conventions
 
-```
-src/features/{Name}/
-  List/index.tsx      — Paginated list with search, filters, sort
-  New/index.tsx       — Create form with validation
-  Detail/index.tsx    — Edit form with initializedRef guard
-  Import/index.tsx    — File import (People only)
-  OcrImport/          — OCR image scan (People only)
-  Teams/index.tsx     — DnD team builder (Encounters, Movements)
-```
+Standard feature folder: `src/features/{Name}/`
+- `List/index.tsx` -- paginated list with filters, sorting
+- `New/index.tsx` -- create form with validation
+- `Detail/index.tsx` -- edit form with `initializedRef` guard
+- `types.ts` -- feature-specific TypeScript types
+- Sub-components as nested folders with `index.tsx` + `types.ts`
 
-Page files (`src/app/app/{route}/page.tsx`) are thin wrappers:
-```tsx
-'use client';
-export default function Page() {
-  return <PermissionGuard roles={[...]}><FeatureList /></PermissionGuard>;
-}
-```
+Page wrappers in `src/app/app/{name}/page.tsx` -- thin `'use client'` wrapper with PermissionGuard.
 Ref: `src/app/app/people/page.tsx`
 
-## Feature Complexity Matrix
+## Complexity Matrix
 
-| Level | Signal | Examples |
-|-------|--------|---------|
-| Simple | Single-entity CRUD, no cascade | Dioceses, Audit, AI Logs |
-| Medium | Cascade selectors, image upload, settings | Parishes, Users, Profile |
-| Complex | Import flows, polling, DnD teams, duplicate detection | People, Encounters |
+| Level | Signals | Features |
+|-------|---------|---------|
+| Low | Single-entity CRUD, no cascade, minimal state | Dioceses, Sectors, Audit, AiLogs, Profile |
+| Medium | Cascade selectors, file upload, charts, settings | Parishes, Users, Movements, Dashboard, Reports, Evaluation |
+| High | Import flows, polling, DnD, duplicate detection, AI features | People, Encounters |
 
-## Dashboard Sub-components
+## Performance Characteristics
 
-`src/features/Dashboard/` contains inline sub-components:
-- `EngagementChart` — Recharts engagement visualization
-- `ScoreChart` — Score distribution chart
-- `StatCard` — Metric card
-- `TopEngagedList` — Top engaged people list
-- `constants.ts`, `types.ts` — Dashboard-specific types
+### Data Loading Patterns
 
-Ref: `src/features/Dashboard/index.tsx`
+| Feature | Strategy | Assessment |
+|---------|----------|-----------|
+| People List | Server-side pagination + TanStack Query | GOOD: offloads to backend, cached |
+| Encounters List | Server-side pagination + TanStack Query | GOOD: same pattern |
+| Dioceses List | Full load + client-side filter | OK: small dataset (~tens) |
+| Dashboard | `useEffect` + `setState` (not TanStack Query) | CONCERN: bypasses cache |
+| Encounter Teams | TanStack Query for teams + available people | GOOD: cached, auto-invalidated |
+| Hierarchy Cascade | Waterfall: diocese -> sector -> parish | CONCERN: sequential API calls |
+| Reports | `useEngagementReport` via AnalyticsContext | GOOD: shared cache |
 
-## Auth Features (under /auth)
+### Scalability Concerns
 
-| Feature | Route | Notes |
-|---------|-------|-------|
-| Login | `/auth/login` | Sets localStorage + syncs cookie |
-| Forgot Password | `/auth/forgot-password` | Email-based reset flow |
-| Reset Password | `/auth/reset-password` | Token-based new password |
+1. **Hierarchy waterfall for super_admin** -- Loading all parishes requires diocese -> sector -> parish cascade (sequential API calls). Mitigated by 5min React Query staleTime but first load is slow.
+   Ref: `src/lib/query/hooks/useHierarchy.ts`
 
-Ref: `src/features/Auth/`
+2. **Dashboard bypasses query cache** -- Uses raw `useEffect` + `Promise.all` + `setState` instead of TanStack Query hooks. Loses caching, deduplication, and background refetch.
+   Ref: `src/features/Dashboard/index.tsx` (lines 46-82)
+
+3. **Unbounded available-people list** -- Encounter Teams loads ALL available people in one request. Could be slow for large parishes.
+   Ref: `src/services/api/EncounterService.ts` (`availablePeople`)
+
+4. **NewPerson raw useEffect loading** -- Parish skills and movements loaded via `useEffect` + `setState`, missing cache benefits.
+   Ref: `src/features/People/New/index.tsx` (lines 106-129)
+
+## Component Inventory (24 shared components)
+
+Auth, Button, ColorPicker, DateInput, Drawer, EmptySlot, FeedbackMsg, Input, Layout, MemberAvatar, Pagination, ParishFilter, PasswordInput, PersonProfileDrawer, SectionCard, Select, SortableTable, TeamIconPicker, TeamMapCard, Toast, Toggle, Tooltip, TopEngagedList, Tutorial
+
+## Service Inventory (13 services)
+
+AdminUserService, AiApiLogService, AuditService, AuthService, CrudService (base), DioceseService, EncounterService, EvaluationService, MovementService, ParishService, PersonService, SectorService, UserService
+Ref: `src/services/api/`
+
+## Context Inventory (8 contexts)
+
+AnalyticsContext, AuthContext, EncounterTeamsContext, LayoutContext, ParishColorContext, ThemeContext, ToastContext, TutorialContext
+Ref: `src/context/`

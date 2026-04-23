@@ -37,7 +37,7 @@ function buildDatesSummary(startIso: string, days: number): string {
   return `${d} de ${month} a ${endDay} de ${endMonth} de ${endYear}`;
 }
 
-const NewEncounter: React.FC = () => {
+const NewEncounter: SafeFC = () => {
   useTutorial();
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, type ChangeEvent } from 'react';
 import Input from '@/components/Input';
 import { InputProps } from '@/components/Input/types';
 
@@ -35,7 +35,7 @@ export interface DateInputProps extends Omit<InputProps, 'type' | 'value' | 'onC
   onChange: (e: { target: { name?: string; value: string } }) => void;
 }
 
-const DateInput: React.FC<DateInputProps> = ({ value, onChange, name, ...rest }) => {
+const DateInput: SafeFC<DateInputProps> = ({ value, onChange, name, ...rest }) => {
   const [display, setDisplay] = useState(() => isoToDisplay(value));
 
   // Sync when external value changes (e.g. form reset or data load)
@@ -44,7 +44,7 @@ const DateInput: React.FC<DateInputProps> = ({ value, onChange, name, ...rest })
   }, [value]);
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const masked = applyMask(e.target.value);
       setDisplay(masked);
 

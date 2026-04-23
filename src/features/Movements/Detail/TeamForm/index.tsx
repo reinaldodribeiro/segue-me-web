@@ -8,7 +8,7 @@ import Select from '@/components/Select';
 import TeamIconPicker from '@/components/TeamIconPicker';
 import { TeamFormProps } from './types';
 
-const TeamForm: React.FC<TeamFormProps> = ({ initial, onSave, onCancel, saving }) => {
+const TeamForm: SafeFC<TeamFormProps> = ({ initial, onSave, onCancel, saving }) => {
   const [name, setName] = useState(initial?.name ?? '');
   const [icon, setIcon] = useState<string | null>(initial?.icon ?? null);
   const [coordYouth, setCoordYouth] = useState(String(initial?.coordinators_youth ?? 0));

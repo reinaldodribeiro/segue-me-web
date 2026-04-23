@@ -218,7 +218,7 @@ export function resolveTeamIcon(name: string | null | undefined): LucideIcon | n
 
 // ——— Picker component ———
 
-const TeamIconPicker: React.FC<TeamIconPickerProps> = ({ value, onChange, label = 'Ícone' }) => {
+const TeamIconPicker: SafeFC<TeamIconPickerProps> = ({ value, onChange, label = 'Ícone' }) => {
   const [open, setOpen] = useState(false);
   const [rendered, setRendered] = useState(false);
   const [visible, setVisible] = useState(false);

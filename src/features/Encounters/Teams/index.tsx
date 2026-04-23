@@ -5,7 +5,7 @@ import { EncounterTeamsProps } from './types';
 import EncounterTeamsView from './EncounterTeamsView';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const EncounterTeams: React.FC<EncounterTeamsProps> = ({ encounterId }) => {
+const EncounterTeams: SafeFC<EncounterTeamsProps> = ({ encounterId }) => {
   useTutorial();
   return (
     <EncounterTeamsProvider encounterId={encounterId}>

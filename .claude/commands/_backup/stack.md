@@ -1,91 +1,117 @@
-<!-- mustard:generated at:2026-04-01T20:20:04Z role:ui -->
+<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
 
 # Stack: Frontend (ui)
 
-> Technology stack, project structure, and tooling for the segue-me Next.js frontend.
+> Technology stack, dependency versions, project structure, tooling, environment, and build analysis.
 
-## Runtime & Framework
+## Core Stack
 
-| Dependency | Version | Role |
-|------------|---------|------|
-| next | ^16.2.1 | App Router, Turbopack dev, Edge middleware |
-| react | ^19.0.0 | UI library |
-| react-dom | ^19.0.0 | DOM renderer |
-| typescript | ^5 | Strict mode, `@/*` path alias → `./src/*` |
-| tailwindcss | ^3.4.17 | CSS utility framework with CSS variable tokens |
+| Tech | Version | Notes |
+|------|---------|-------|
+| Next.js | ^16.2.1 | App Router, Turbopack dev server, Edge Middleware |
+| React | ^19.0.0 | Concurrent features available |
+| TypeScript | ^5 | `strict: true`, `@/*` path alias, `ES2017` target |
+| Tailwind CSS | ^3.4.17 | CSS variable tokens, `[data-theme="dark"]` dark mode |
+| Axios | ^1.7.9 | HTTP client with interceptor pipeline |
+| TanStack Query | ^5.95.2 | Server state, `staleTime: 2min`, `gcTime: 10min`, `retry: 1` |
+| @dnd-kit | core ^6.3.1, sortable ^10.0.0 | Drag-and-drop for encounter team building |
+| Recharts | ^3.8.0 | Dashboard charts (lazy-loaded via `next/dynamic`) |
+| Lucide React | ^0.468.0 | Tree-shakeable icon library |
 
-## Key Dependencies
+Ref: `package.json`, `tsconfig.json`
 
-| Dependency | Version | Role |
-|------------|---------|------|
-| @tanstack/react-query | ^5.95.2 | All server state management |
-| axios | ^1.7.9 | HTTP client (wrapped in `src/config/api.ts`) |
-| @dnd-kit/core | ^6.3.1 | Drag-and-drop (encounter team builder) |
-| @dnd-kit/sortable | ^10.0.0 | Sortable DnD primitives |
-| lucide-react | ^0.468.0 | Icon set |
-| recharts | ^3.8.0 | Charts (dashboard engagement/score) |
+## TypeScript Strictness
+
+- `strict: true` -- full strict mode enabled
+- `isolatedModules: true` -- required for Turbopack/SWC
+- `noEmit: true` -- build handled by Next.js
+- `moduleResolution: bundler` -- modern resolution
+- Path alias: `@/*` maps to `./src/*`
+
+Ref: `tsconfig.json`
+
+## Next.js Configuration
+
+- `images.remotePatterns` configured for `NEXT_PUBLIC_STORAGE_URL` origin
+- No custom webpack overrides (uses Turbopack)
+- No `output: 'standalone'` (default server mode)
+- No custom headers, rewrites, or redirects
+
+Ref: `next.config.ts`
+
+## Bundle Size Analysis
+
+| Dependency | Approx. Size | Mitigation |
+|-----------|-------------|-----------|
+| recharts | ~300 KB gzipped | Lazy-loaded via `next/dynamic` with `ssr: false` |
+| @dnd-kit | ~50 KB | Only loaded on Teams pages |
+| lucide-react | Tree-shakeable | Named imports only |
+| axios | ~14 KB | Always loaded (core HTTP) |
+| @tanstack/react-query-devtools | Dev only | Conditionally rendered in development |
 
 ## Project Structure
 
 ```
 frontend/src/
-  app/              — Next.js App Router pages (thin wrappers only)
-    app/            — Protected routes (auth-gated by middleware + PermissionGuard)
-    auth/           — Public auth pages (login, forgot-password, reset-password)
-    providers.tsx   — Root provider composition
-  components/       — Shared UI primitives (Button, Input, Select, SortableTable…)
-  config/
-    api.ts          — Axios singleton with auth interceptors
-  constants/
-    permissions.ts  — ROUTE_PERMISSIONS map (source of truth for route access)
-    tutorials.ts    — Tutorial step definitions
-  context/          — React Contexts (Auth, Theme, Toast, ParishColor, Layout, Tutorial)
-  features/         — Feature components (List, New, Detail per entity)
-  hooks/            — Custom hooks (usePermissions, useErrorHandler, useHierarchyCascade…)
-  interfaces/       — TypeScript interfaces per domain
-  lib/query/        — TanStack Query client, keys factory, per-entity hooks
-  middleware.ts     — Edge middleware (auth redirect gate)
-  services/api/     — Service classes extending CrudService
-  types/            — Global type aliases (roles)
-  utils/            — Helpers: cn(), storageUrl(), formatDate(), slugify()
+  app/                  # Next.js App Router pages
+    app/                # Protected routes (/app/*)
+    auth/               # Public routes (/auth/*)
+    providers.tsx       # Provider composition (7 providers)
+    layout.tsx          # Root layout (html, body, Providers)
+  features/             # Feature modules (List/New/Detail per entity, 14 features)
+  components/           # Reusable UI components (24 directories)
+  services/api/         # API service classes (13 services extending CrudService)
+  lib/query/            # TanStack Query: client, keys, provider, hooks/ (11 hook files)
+  context/              # React context providers (8 contexts)
+  hooks/                # Custom hooks (14 hooks)
+  interfaces/           # TypeScript interfaces per domain
+  types/                # Global type aliases (roles)
+  constants/            # App constants (permissions, tutorials)
+  utils/                # Helpers: cn(), storageUrl(), formatDate(), slugify(), authCookie
+  config/               # API client configuration (Axios singleton)
+  middleware.ts         # Edge Middleware (auth redirect gate)
 ```
 
 ## Commands
 
 ```bash
-npm run dev      # Start dev server (Turbopack)
-npm run build    # Production build
-npm run lint     # ESLint via next lint
-npm run start    # Start production server
-npx tsc --noEmit # Type-check without emitting (no test runner configured)
+npm run dev          # Start dev server (Turbopack)
+npm run build        # Production build
+npm run lint         # ESLint via next lint
+npm run start        # Start production server
+npm run test         # Jest tests
+npm run test:watch   # Jest in watch mode
+npx tsc --noEmit     # Type-check without emitting
 ```
 
 ## Environment Variables
 
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-NEXT_PUBLIC_STORAGE_URL=http://localhost:8000/storage
-```
-
-## Linting & Type Checking
-
-- ESLint via `eslint-config-next` — run with `npm run lint`
-- TypeScript strict mode — validate with `npx tsc --noEmit`
-- No test runner configured
+| Variable | Default | Usage |
+|----------|---------|-------|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000/api` | Axios baseURL in `src/config/api.ts` |
+| `NEXT_PUBLIC_STORAGE_URL` | `http://localhost:8000/storage` | Image/file URLs via `storageUrl()` |
 
 ## Theming Tokens
 
-CSS variable tokens — NEVER use hardcoded colors:
+All colors resolve to CSS variables. Never use hardcoded Tailwind color classes.
 
 | Token | Usage |
 |-------|-------|
-| `text-text` | Primary text |
-| `text-text-muted` | Secondary/muted |
-| `bg-panel` | Card/panel backgrounds |
+| `text-text`, `text-text-muted` | Primary/secondary text |
+| `bg-panel`, `bg-panel-2`, `bg-card-bg` | Card/panel backgrounds |
 | `border-border` | Borders |
-| `bg-hover` | Hover states |
-| `text-primary` / `bg-primary` | Brand purple `#6d28d9` |
+| `bg-hover`, `text-hover-fg` | Hover states |
+| `text-primary`, `bg-primary` | Brand purple |
+| `bg-primary-subtle`, `text-secondary` | Subtle/secondary brand |
 | `bg-input-bg`, `border-input-border`, `text-input-text` | Form inputs |
 
-Dark mode: `[data-theme="dark"]` selector via `ThemeProvider`.
+Dark mode: `[data-theme="dark"]` selector via ThemeProvider.
 Ref: `tailwind.config.ts`
+
+## Provider Stack (outermost to innermost)
+
+Ref: `src/app/providers.tsx`
+
+`QueryProvider` > `ToastProvider` > `ThemeProvider` > `ParishColorProvider` > `LayoutProvider` > `AuthProvider` > `TutorialProvider`
+
+Protected app pages additionally wrap content with `AnalyticsProvider`.

@@ -67,7 +67,9 @@ export function useParishFilter(): ParishFilterState {
     (isSuperAdmin || isDioceseAdmin) ? effectiveDioceseId : (isSectorAdmin ? (user?.sector_id ?? '') : '')
   );
 
-  const parishesQuery = useHierarchyParishes(sectorId || (isSectorAdmin ? (user?.sector_id ?? '') : ''));
+  const parishesQuery = useHierarchyParishes(
+    isAboveParish ? (sectorId || (isSectorAdmin ? (user?.sector_id ?? '') : '')) : ''
+  );
 
   // ── Diocese-wide parish enumeration (for aggregate when no sector) ────────
   //

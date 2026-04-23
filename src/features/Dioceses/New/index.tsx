@@ -20,7 +20,7 @@ interface FormErrors {
   name?: string;
 }
 
-const NewDiocese: React.FC = () => {
+const NewDiocese: SafeFC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>({ name: '', active: true });

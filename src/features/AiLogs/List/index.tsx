@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Bot, RefreshCw, DollarSign, Zap, CheckCircle, XCircle, Clock } from 'lucide-react';
 import DateInput from '@/components/DateInput';
 import Pagination from '@/components/Pagination';
@@ -52,7 +52,7 @@ function actionBadgeClass(action: string): string {
 interface StatCardProps {
   label: string;
   value: string | number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   sub?: string;
 }
 
@@ -69,7 +69,7 @@ function StatCard({ label, value, icon, sub }: StatCardProps) {
   );
 }
 
-const AiLogsList: React.FC = () => {
+const AiLogsList: SafeFC = () => {
   useTutorial();
   const [action, setAction] = useState('');
   const [success, setSuccess] = useState('');

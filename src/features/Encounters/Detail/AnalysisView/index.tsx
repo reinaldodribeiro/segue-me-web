@@ -11,7 +11,7 @@ import { AnalysisViewProps } from './types';
 const POLL_INTERVAL_MS = 4000;
 const STORAGE_KEY = (id: string) => `ai_analysis_generating_${id}`;
 
-const AnalysisView: React.FC<AnalysisViewProps> = ({ encounterId, encounterName }) => {
+const AnalysisView: SafeFC<AnalysisViewProps> = ({ encounterId, encounterName }) => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const [analysis, setAnalysis] = useState<EncounterAnalysis | null>(null);

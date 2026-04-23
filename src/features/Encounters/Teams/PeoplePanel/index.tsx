@@ -12,14 +12,14 @@ import {
   PersonTeamExperience,
 } from "@/interfaces/Person";
 import { TeamMemberRole } from "@/interfaces/Encounter";
-import { useEncounterTeams } from "@/context/EncounterTeamsContext";
+import { useEncounterTeams } from "@/hooks/useEncounterTeams";
 import { useEncounterPreviousParticipants } from "@/lib/query/hooks/useEncounters";
 import PersonService from "@/services/api/PersonService";
 import DraggablePerson from "./DraggablePerson";
 
 // ——— Panel ———
 
-const PeoplePanel: React.FC = () => {
+const PeoplePanel: SafeFC = () => {
   const {
     encounterId,
     filteredAvailable,

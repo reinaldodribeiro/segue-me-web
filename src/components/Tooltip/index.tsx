@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { TooltipProps, TooltipPosition } from './types';
 import { GAP, ARROW, ARROW_WRAPPER } from './constants';
@@ -35,9 +35,9 @@ function calcPos(rect: DOMRect, position: TooltipPosition) {
   }
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ content, children, position = 'top', maxWidth = 280 }) => {
+const Tooltip: SafeFC<TooltipProps> = ({ content, children, position = 'top', maxWidth = 280 }) => {
   const [visible, setVisible] = useState(false);
-  const [style, setStyle] = useState<React.CSSProperties>({});
+  const [style, setStyle] = useState<CSSProperties>({});
   const triggerRef = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {

@@ -2,10 +2,10 @@
 
 import { usePathname } from 'next/navigation';
 import { HelpCircle } from 'lucide-react';
-import { useTutorialContext } from '@/context/TutorialContext';
+import { useTutorialContext } from '@/hooks/useTutorialContext';
 import { cn } from '@/utils/helpers';
 
-export default function TutorialButton() {
+const TutorialButton: SafeFC = () => {
   const pathname = usePathname();
   const { startTutorial, hasTutorialForRoute, isActive } = useTutorialContext();
 
@@ -28,4 +28,6 @@ export default function TutorialButton() {
       <HelpCircle size={20} />
     </button>
   );
-}
+};
+
+export default TutorialButton;

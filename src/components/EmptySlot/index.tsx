@@ -3,7 +3,7 @@
 import { UserPlus } from 'lucide-react';
 import { EmptySlotProps } from './types';
 
-const EmptySlot: React.FC<EmptySlotProps> = ({ onClick, overflowCount }) => {
+const EmptySlot: SafeFC<EmptySlotProps> = ({ onClick, overflowCount }) => {
   if (overflowCount !== undefined) {
     return (
       <div className="flex flex-col items-center gap-1 w-16">

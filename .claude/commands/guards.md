@@ -1,8 +1,37 @@
-<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
+<!-- mustard:generated at:2026-04-23T00:00:00Z role:ui -->
 
 # Guards: Frontend (ui)
 
 > DO/DON'T rules for the segue-me frontend. No code examples -- see patterns.md for references.
+
+## Component Declaration (SafeFC)
+
+| DO | DON'T |
+|----|-------|
+| Declare components as `const X: SafeFC<Props> = () => {}` | Use `React.FC<Props>`, `function X(props: Props)`, or untyped arrow functions |
+| Export with `export default X` at the bottom | Use `export default function X` or inline export |
+| Use `memo()` named import for memoized components | Use `React.memo()` |
+| Keep `React.forwardRef` for Button, Input, Select, PasswordInput | Convert forwardRef components to SafeFC |
+| Rely on global `SafeFC` type from `src/types/global.d.ts` | Import SafeFC from anywhere -- it is globally declared |
+
+## Context Pattern
+
+| DO | DON'T |
+|----|-------|
+| Export `interface XContextData` from the context file | Use inline types or `any` for context values |
+| Name the value variable `valueData` with explicit type annotation | Use anonymous objects or untyped useMemo |
+| Wrap all context value in `useMemo(() => ({...}), [deps])` | Pass a new object literal to `value={}` directly |
+| Wrap all context functions in `useCallback` | Define functions inline inside the provider body |
+| Export only `XContext` and `XProvider` from context files | Export a `useX` hook from the context file |
+
+## Context Hooks
+
+| DO | DON'T |
+|----|-------|
+| Place each context hook in `src/hooks/useX.ts` | Co-locate the hook inside the context file |
+| Use explicit return type: `export function useX(): XContextData` | Omit the return type or use inferred typing |
+| Import both `XContext` and `XContextData` from the context | Only import the context without the data interface |
+| Throw an error if context is null/undefined | Return null/undefined -- always throw |
 
 ## Data Fetching
 

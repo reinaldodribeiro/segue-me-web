@@ -1,6 +1,6 @@
 import { StatsBarProps } from './types';
 
-const StatsBar: React.FC<StatsBarProps> = ({ totalFilled, totalSlots, totalConfirmed, teamsComplete, teamsLength }) => {
+const StatsBar: SafeFC<StatsBarProps> = ({ totalFilled, totalSlots, totalConfirmed, teamsComplete, teamsLength }) => {
   const stats = [
     { label: 'Vagas preenchidas', value: `${totalFilled}/${totalSlots}`, color: 'text-text' },
     { label: 'Confirmados',       value: totalConfirmed,                  color: 'text-green-600' },

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Search, X, Sparkles, Loader2, AlertCircle, Users, Trophy, RefreshCw } from 'lucide-react';
 import { Person } from '@/interfaces/Person';
 
-import { useEncounterTeams } from '@/context/EncounterTeamsContext';
+import { useEncounterTeams } from '@/hooks/useEncounterTeams';
 import { useEncounterAvailablePeople } from '@/lib/query/hooks/useEncounters';
 import { useDebounce } from '@/hooks/useDebounce';
 import EncounterService from '@/services/api/EncounterService';
@@ -16,7 +16,7 @@ import { AddMemberModalProps, AddMemberTab, AISuggestion } from './types';
 /** In-memory cache keyed by `teamId:role` — persists across modal open/close for the session */
 const aiCache = new Map<string, AISuggestion[]>();
 
-const AddMemberModal: React.FC<AddMemberModalProps> = ({ open, onClose, team, role }) => {
+const AddMemberModal: SafeFC<AddMemberModalProps> = ({ open, onClose, team, role }) => {
   const { encounterId, teams, addMember } = useEncounterTeams();
 
   const [rendered, setRendered] = useState(false);

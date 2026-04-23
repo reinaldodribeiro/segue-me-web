@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Crown, Loader2, Plus, Users, X } from 'lucide-react';
 import Button from '@/components/Button';
 import SectionCard from '@/components/SectionCard';
@@ -22,7 +22,7 @@ interface TeamExperiencesSectionProps {
   canEdit: boolean;
 }
 
-const TeamExperiencesSection: React.FC<TeamExperiencesSectionProps> = React.memo(
+const TeamExperiencesSection: SafeFC<TeamExperiencesSectionProps> = memo(
   ({ personId, initialExperiences, canEdit }) => {
     const { toast } = useToast();
     const { handleError } = useErrorHandler();

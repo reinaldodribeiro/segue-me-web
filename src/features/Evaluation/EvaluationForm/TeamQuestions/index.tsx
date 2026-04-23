@@ -41,7 +41,7 @@ function StarRating({
   );
 }
 
-const TeamQuestions: React.FC<TeamQuestionsProps> = ({ form, onChange, errors }) => {
+const TeamQuestions: SafeFC<TeamQuestionsProps> = ({ form, onChange, errors }) => {
   return (
     <div className="space-y-5">
       <h3 className="text-sm font-semibold text-text border-b border-border pb-2">

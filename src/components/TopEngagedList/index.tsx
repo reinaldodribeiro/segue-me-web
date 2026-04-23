@@ -18,7 +18,7 @@ const LEVEL_STYLE: Record<string, { textColor: string; badgeBg: string; badgeTex
   destaque: { label: 'Destaque', textColor: 'text-amber-600',  badgeBg: 'bg-amber-100',  badgeText: 'text-amber-700'  },
 };
 
-const TopEngagedList: React.FC<TopEngagedListProps> = ({
+const TopEngagedList: SafeFC<TopEngagedListProps> = ({
   people,
   limit = 5,
   loading = false,

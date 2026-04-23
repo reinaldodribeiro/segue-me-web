@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
-import { Sidebar } from '@/components/Layout/Sidebar';
+import Sidebar from '@/components/Layout/Sidebar';
 
-export const MobileDrawer: React.FC = () => {
+const MobileDrawer: SafeFC = () => {
   const { isMobileDrawerOpen, closeMobileDrawer } = useLayout();
 
   // Close on Escape
@@ -50,3 +50,5 @@ export const MobileDrawer: React.FC = () => {
     </div>
   );
 };
+
+export default MobileDrawer;

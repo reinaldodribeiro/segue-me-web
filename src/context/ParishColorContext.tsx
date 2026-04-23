@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-interface ParishColorContextType {
+export interface ParishColorContextData {
   primaryColor: string | null;
   secondaryColor: string | null;
   previewActive: boolean;
@@ -11,7 +11,7 @@ interface ParishColorContextType {
   clearPreview: () => void;
 }
 
-export const ParishColorContext = createContext<ParishColorContextType | undefined>(undefined);
+export const ParishColorContext = createContext<ParishColorContextData | undefined>(undefined);
 
 function hexToHsl(hex: string): [number, number, number] {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -115,11 +115,13 @@ export const ParishColorProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setPreviewActive(false);
   }, [primaryColor, secondaryColor]);
 
+  const valueData: ParishColorContextData = useMemo(
+    () => ({ primaryColor, secondaryColor, previewActive, applyParishColors, previewColors, clearPreview }),
+    [primaryColor, secondaryColor, previewActive, applyParishColors, previewColors, clearPreview],
+  );
+
   return (
-    <ParishColorContext.Provider value={{
-      primaryColor, secondaryColor, previewActive,
-      applyParishColors, previewColors, clearPreview,
-    }}>
+    <ParishColorContext.Provider value={valueData}>
       {children}
     </ParishColorContext.Provider>
   );

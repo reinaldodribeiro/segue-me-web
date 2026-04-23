@@ -31,7 +31,7 @@ function actionBadge(action: string) {
   return 'text-text-muted bg-hover border-border';
 }
 
-const AuditList: React.FC = () => {
+const AuditList: SafeFC = () => {
   useTutorial();
   const [search, setSearch] = useState('');
   const [from, setFrom] = useState('');

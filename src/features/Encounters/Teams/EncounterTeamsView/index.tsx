@@ -5,7 +5,7 @@ import { DndContext, DragEndEvent, DragOverlay, PointerSensor, useSensor, useSen
 import { RefreshCw, X, Trash2 } from 'lucide-react';
 import { Person } from '@/interfaces/Person';
 import { TeamMemberRole } from '@/interfaces/Encounter';
-import { useEncounterTeams } from '@/context/EncounterTeamsContext';
+import { useEncounterTeams } from '@/hooks/useEncounterTeams';
 import { useToast } from '@/hooks/useToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import Button from '@/components/Button';
@@ -15,7 +15,7 @@ import TeamMapGrid from '../TeamMapGrid';
 import PeoplePanel from '../PeoplePanel';
 import PersonGhost from '../PersonGhost';
 
-const EncounterTeamsView: React.FC = () => {
+const EncounterTeamsView: SafeFC = () => {
   const {
     encounterId,
     teams, available,

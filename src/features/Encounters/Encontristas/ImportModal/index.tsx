@@ -8,7 +8,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import EncounterService from '@/services/api/EncounterService';
 import { ImportModalProps } from '../types';
 
-const ImportModal: React.FC<ImportModalProps> = ({ encounterId, onClose, onSuccess }) => {
+const ImportModal: SafeFC<ImportModalProps> = ({ encounterId, onClose, onSuccess }) => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const fileRef = useRef<HTMLInputElement>(null);

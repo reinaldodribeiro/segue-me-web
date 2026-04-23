@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { DrawerProps } from './types';
 
-const Drawer: React.FC<DrawerProps> = ({
+const Drawer: SafeFC<DrawerProps> = ({
   open,
   onClose,
   title,

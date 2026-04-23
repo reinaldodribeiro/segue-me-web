@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { useTutorialContext } from '@/context/TutorialContext';
+import { useTutorialContext } from '@/hooks/useTutorialContext';
 import { cn } from '@/utils/helpers';
 
 // ── Spotlight ─────────────────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ const TOOLTIP_APPROX_HEIGHT = 200;
 function computeTooltipStyle(
   rect: DOMRect,
   placement: 'top' | 'bottom' | 'left' | 'right',
-): React.CSSProperties {
+): CSSProperties {
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
 
@@ -112,7 +112,7 @@ function computeTooltipStyle(
 
 // ── Main overlay ──────────────────────────────────────────────────────────────
 
-export default function TutorialOverlay() {
+const TutorialOverlay: SafeFC = () => {
   const {
     isActive,
     currentStep,
@@ -242,4 +242,6 @@ export default function TutorialOverlay() {
   );
 
   return createPortal(overlay, document.body);
-}
+};
+
+export default TutorialOverlay;

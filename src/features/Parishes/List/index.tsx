@@ -25,7 +25,7 @@ import { useTutorial } from "@/hooks/useTutorial";
 
 type StatusFilter = "all" | "active" | "inactive";
 
-const ParishesList: React.FC = () => {
+const ParishesList: SafeFC = () => {
   useTutorial();
   const { isSuperAdmin, isDioceseAdmin } = usePermissions();
 

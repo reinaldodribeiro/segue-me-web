@@ -65,7 +65,7 @@ import { PersonDetailProps } from './types';
 import HistorySection from './HistorySection';
 import TeamExperiencesSection from './TeamExperiencesSection';
 
-const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
+const PersonDetail: SafeFC<PersonDetailProps> = ({ id }) => {
   useTutorial();
   const router = useRouter();
   const { toast } = useToast();

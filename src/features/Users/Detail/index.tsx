@@ -46,7 +46,7 @@ interface InfoErrors {
   parishId?: string;
 }
 
-const UserDetail: React.FC = () => {
+const UserDetail: SafeFC = () => {
   useTutorial();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

@@ -9,7 +9,7 @@ import {
   PersonTeamExperience,
 } from "@/interfaces/Person";
 import { memberDisplayName, memberInitials } from "@/utils/personDisplay";
-import { useEncounterTeams } from "@/context/EncounterTeamsContext";
+import { useEncounterTeams } from "@/hooks/useEncounterTeams";
 import { storageUrl } from "@/utils/helpers";
 import PersonService from "@/services/api/PersonService";
 import Drawer from "@/components/Drawer";
@@ -228,7 +228,7 @@ const ProfileDrawer = memo(function ProfileDrawer({
 
 /* ─── MemberAvatar ───────────────────────────────────────────────── */
 
-const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
+const MemberAvatar: SafeFC<MemberAvatarProps> = ({ member }) => {
   const { removeMember, updateMemberStatus } = useEncounterTeams();
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });

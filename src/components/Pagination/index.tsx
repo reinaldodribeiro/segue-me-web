@@ -19,7 +19,7 @@ function getPages(current: number, last: number): (number | '...')[] {
   return pages;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) => {
+const Pagination: SafeFC<PaginationProps> = ({ meta, onPageChange }) => {
   const { current_page, last_page, per_page, total } = meta;
 
   if (last_page <= 1) return null;

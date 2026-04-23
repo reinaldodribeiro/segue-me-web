@@ -27,7 +27,7 @@ import { storageUrl } from "@/utils/helpers";
 import { useParishColor } from "@/hooks/useParishColor";
 import { useAuth } from "@/hooks/useAuth";
 
-const ParishSettings: React.FC = () => {
+const ParishSettings: SafeFC = () => {
   const { user, setUser } = useAuth();
   const parishId = user?.parish_id ?? "";
   const { toast } = useToast();

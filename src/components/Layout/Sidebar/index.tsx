@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { useLayout } from "@/hooks/useLayout";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +16,7 @@ interface SidebarProps {
   onNavClick?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
+const Sidebar: SafeFC<SidebarProps> = memo(({ onNavClick }) => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { theme, toggleTheme } = useTheme();
   const { user, logOut } = useAuth();
@@ -227,3 +227,5 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
     </aside>
   );
 });
+
+export default Sidebar;

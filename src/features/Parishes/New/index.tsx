@@ -31,7 +31,7 @@ interface FormErrors {
   name?: string;
 }
 
-const NewParish: React.FC = () => {
+const NewParish: SafeFC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();

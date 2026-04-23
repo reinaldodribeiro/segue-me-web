@@ -1,7 +1,7 @@
 import { useContext } from 'react';
-import { LayoutContext } from '@/context/LayoutContext';
+import { LayoutContext, LayoutContextData } from '@/context/LayoutContext';
 
-export function useLayout() {
+export function useLayout(): LayoutContextData {
   const context = useContext(LayoutContext);
   if (!context) throw new Error('useLayout must be used within a LayoutProvider');
   return context;

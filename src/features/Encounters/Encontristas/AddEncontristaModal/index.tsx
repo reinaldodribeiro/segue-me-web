@@ -12,7 +12,7 @@ import { PersonType } from '@/interfaces/Person';
 import EncounterService from '@/services/api/EncounterService';
 import { AddEncontristaModalProps } from '../types';
 
-const AddEncontristaModal: React.FC<AddEncontristaModalProps> = ({ encounterId, onClose, onAdded }) => {
+const AddEncontristaModal: SafeFC<AddEncontristaModalProps> = ({ encounterId, onClose, onAdded }) => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
 

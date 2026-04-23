@@ -1,15 +1,15 @@
 'use client';
 
-import React, { createContext, useCallback, useState } from 'react';
+import React, { createContext, useCallback, useMemo, useState } from 'react';
 import { Toast, ToastOptions } from '@/interfaces/Toast';
 import ToastViewport from '@/components/Toast';
 
-interface ToastContextType {
+export interface ToastContextData {
   toast: (options: ToastOptions) => void;
   dismiss: (id: string) => void;
 }
 
-export const ToastContext = createContext<ToastContextType | undefined>(undefined);
+export const ToastContext = createContext<ToastContextData | undefined>(undefined);
 
 const TOAST_LIMIT = 5;
 const DEFAULT_DURATION = 3500;
@@ -32,8 +32,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const valueData: ToastContextData = useMemo(
+    () => ({ toast, dismiss }),
+    [toast, dismiss],
+  );
+
   return (
-    <ToastContext.Provider value={{ toast, dismiss }}>
+    <ToastContext.Provider value={valueData}>
       {children}
       <ToastViewport toasts={toasts} onDismiss={dismiss} />
     </ToastContext.Provider>

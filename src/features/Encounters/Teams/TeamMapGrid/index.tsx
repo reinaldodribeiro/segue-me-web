@@ -3,9 +3,9 @@
 import { RefreshCw, Users } from 'lucide-react';
 import Button from '@/components/Button';
 import TeamMapCard from '@/components/TeamMapCard';
-import { useEncounterTeams } from '@/context/EncounterTeamsContext';
+import { useEncounterTeams } from '@/hooks/useEncounterTeams';
 
-const TeamMapGrid: React.FC = () => {
+const TeamMapGrid: SafeFC = () => {
   const { teams, loadingTeams, syncing, syncTeams } = useEncounterTeams();
 
   if (loadingTeams) {

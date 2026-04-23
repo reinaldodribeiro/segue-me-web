@@ -4,7 +4,7 @@ import Button from '@/components/Button';
 import EvaluationService from '@/services/api/EvaluationService';
 import { PinVerificationProps } from './types';
 
-const PinVerification: React.FC<PinVerificationProps> = ({ token, onVerified }) => {
+const PinVerification: SafeFC<PinVerificationProps> = ({ token, onVerified }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

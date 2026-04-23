@@ -44,7 +44,7 @@ const EMPTY_FORM = {
   photoPreview: null as string | null,
 };
 
-const Encontristas: React.FC<EncontristasProps> = ({
+const Encontristas: SafeFC<EncontristasProps> = ({
   encounterId,
   encounterName,
   maxParticipants,

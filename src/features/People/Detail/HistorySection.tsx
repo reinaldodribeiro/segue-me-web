@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { History, ClipboardCheck, ChevronUp, Star, ThumbsUp } from 'lucide-react';
 import Link from 'next/link';
 import SectionCard from '@/components/SectionCard';
@@ -34,7 +34,7 @@ interface HistorySectionProps {
   history: PersonHistory[];
 }
 
-const HistorySection: React.FC<HistorySectionProps> = React.memo(({ history }) => {
+const HistorySection: SafeFC<HistorySectionProps> = memo(({ history }) => {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const stats = useMemo(() => {

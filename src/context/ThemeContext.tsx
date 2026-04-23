@@ -1,16 +1,16 @@
 'use client';
 
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
-interface ThemeContextType {
+export interface ThemeContextData {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
 
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextData | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('light');
@@ -27,11 +27,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const setTheme = (newTheme: Theme) => setThemeState(newTheme);
-  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+  const setTheme = useCallback((newTheme: Theme) => setThemeState(newTheme), []);
+  const toggleTheme = useCallback(() => setThemeState(prev => prev === 'light' ? 'dark' : 'light'), []);
+
+  const valueData: ThemeContextData = useMemo(
+    () => ({ theme, setTheme, toggleTheme }),
+    [theme, setTheme, toggleTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={valueData}>
       {children}
     </ThemeContext.Provider>
   );

@@ -48,7 +48,7 @@ function clearDraft(token: string) {
   }
 }
 
-const EvaluationForm: React.FC<EvaluationFormProps> = ({
+const EvaluationForm: SafeFC<EvaluationFormProps> = ({
   token,
   sessionToken,
   formData,

@@ -29,7 +29,7 @@ function MemberStarRating({
   );
 }
 
-const MemberQuestions: React.FC<MemberQuestionsProps> = ({ members, onChange, errors }) => {
+const MemberQuestions: SafeFC<MemberQuestionsProps> = ({ members, onChange, errors }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
   return (

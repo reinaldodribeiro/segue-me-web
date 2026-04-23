@@ -45,7 +45,7 @@ interface FormErrors {
   parishId?: string;
 }
 
-const NewUser: React.FC = () => {
+const NewUser: SafeFC = () => {
   useTutorial();
   const router = useRouter();
   const queryClient = useQueryClient();

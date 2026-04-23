@@ -25,7 +25,7 @@ function getUserRole(user: User): UserRole | null {
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-const UsersList: React.FC = () => {
+const UsersList: SafeFC = () => {
   useTutorial();
   const { isSuperAdmin, isDioceseAdmin } = usePermissions();
 

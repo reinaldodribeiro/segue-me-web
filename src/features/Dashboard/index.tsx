@@ -6,7 +6,7 @@ import { Calendar, CheckCircle2, ChevronRight, Loader2, TrendingUp, Users } from
 import { EncounterStatus, Encounter } from '@/interfaces/Encounter';
 import { EngagementLevel } from '@/interfaces/Person';
 import dynamic from 'next/dynamic';
-import { useAnalytics } from '@/context/AnalyticsContext';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import ParishFilter from '@/components/ParishFilter';
 import TopEngagedList from '@/components/TopEngagedList';
 import StatCard from './StatCard';
@@ -32,7 +32,7 @@ function Skeleton({ className }: { className: string }) {
   return <div className={`bg-hover rounded-xl animate-pulse ${className}`} />;
 }
 
-const Dashboard: React.FC = () => {
+const Dashboard: SafeFC = () => {
   useTutorial();
   const { filter, engagement, loadingEngagement } = useAnalytics();
   const { selectedParishId, isAboveParish, loadingScope } = filter;

@@ -17,7 +17,7 @@ import { PermissionGuardProps } from './types';
  * Role-based enforcement lives here in the client layer because roles are
  * stored server-side and resolved after the initial auth token exchange.
  */
-const PermissionGuard: React.FC<PermissionGuardProps> = ({
+const PermissionGuard: SafeFC<PermissionGuardProps> = ({
   roles,
   children,
   redirectTo = '/app',

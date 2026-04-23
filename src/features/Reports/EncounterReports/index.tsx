@@ -9,7 +9,7 @@ import { EncounterAnalysis, FULFILLED_LABELS, RECOMMEND_LABELS } from '@/interfa
 
 import type { EncounterReportsProps, RefusalItem } from './types';
 
-const EncounterReports: React.FC<EncounterReportsProps> = ({ encounters }) => {
+const EncounterReports: SafeFC<EncounterReportsProps> = ({ encounters }) => {
   const [selectedId, setSelectedId] = useState<string>('');
   const [analysis, setAnalysis] = useState<EncounterAnalysis | null>(null);
   const [refusals, setRefusals] = useState<RefusalItem[] | null>(null);

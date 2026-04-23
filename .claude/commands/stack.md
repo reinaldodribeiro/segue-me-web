@@ -1,4 +1,4 @@
-<!-- mustard:generated at:2026-04-18T12:00:00Z role:ui -->
+<!-- mustard:generated at:2026-04-23T00:00:00Z role:ui -->
 
 # Stack: Frontend (ui)
 
@@ -27,8 +27,9 @@ Ref: `package.json`, `tsconfig.json`
 - `noEmit: true` -- build handled by Next.js
 - `moduleResolution: bundler` -- modern resolution
 - Path alias: `@/*` maps to `./src/*`
+- Global types: `src/types/global.d.ts` defines `SafeFC<P>` globally
 
-Ref: `tsconfig.json`
+Ref: `tsconfig.json`, `src/types/global.d.ts`
 
 ## Next.js Configuration
 
@@ -52,7 +53,7 @@ Ref: `next.config.ts`
 ## Project Structure
 
 ```
-frontend/src/
+src/
   app/                  # Next.js App Router pages
     app/                # Protected routes (/app/*)
     auth/               # Public routes (/auth/*)
@@ -63,9 +64,9 @@ frontend/src/
   services/api/         # API service classes (13 services extending CrudService)
   lib/query/            # TanStack Query: client, keys, provider, hooks/ (11 hook files)
   context/              # React context providers (8 contexts)
-  hooks/                # Custom hooks (14 hooks)
+  hooks/                # Custom hooks (17 hooks)
   interfaces/           # TypeScript interfaces per domain
-  types/                # Global type aliases (roles)
+  types/                # Global types (SafeFC, roles)
   constants/            # App constants (permissions, tutorials)
   utils/                # Helpers: cn(), storageUrl(), formatDate(), slugify(), authCookie
   config/               # API client configuration (Axios singleton)

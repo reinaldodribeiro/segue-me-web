@@ -11,7 +11,7 @@ import { useMovementList } from '@/lib/query/hooks/useMovements';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const MovementsList: React.FC = () => {
+const MovementsList: SafeFC = () => {
   useTutorial();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);

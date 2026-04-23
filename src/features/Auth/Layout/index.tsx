@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-interface AuthLayoutProps {
-  children: React.ReactNode;
-}
+interface AuthLayoutProps {}
 
 const VERSES = [
   { text: 'Vinde após mim, e eu vos farei pescadores de homens.', ref: 'Mateus 4:19' },
@@ -17,7 +15,7 @@ const VERSES = [
   { text: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.', ref: 'João 3:16' },
 ];
 
-const ScriptureCarousel: React.FC = () => {
+const ScriptureCarousel: SafeFC = () => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -79,7 +77,7 @@ const ScriptureCarousel: React.FC = () => {
   );
 };
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
+const AuthLayout: SafeFC<AuthLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center p-0 md:p-6">
       <div className="bg-white w-full max-w-5xl md:min-h-[640px] rounded-none md:rounded-2xl shadow-none md:shadow-2xl overflow-hidden flex flex-col lg:flex-row auth-container">

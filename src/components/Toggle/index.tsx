@@ -1,7 +1,7 @@
 import { cn } from '@/utils/helpers';
 import { ToggleProps } from './types';
 
-const Toggle: React.FC<ToggleProps> = ({ checked, onChange }) => {
+const Toggle: SafeFC<ToggleProps> = ({ checked, onChange }) => {
   return (
     <button
       type="button"

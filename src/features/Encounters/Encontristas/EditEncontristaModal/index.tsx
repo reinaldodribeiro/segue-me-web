@@ -21,7 +21,7 @@ function toInputDate(val: string | null): string {
   return `${y}-${m}-${d}`;
 }
 
-const EditEncontristaModal: React.FC<EditEncontristaModalProps> = ({ encounterId, participant, onClose, onSaved }) => {
+const EditEncontristaModal: SafeFC<EditEncontristaModalProps> = ({ encounterId, participant, onClose, onSaved }) => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const photoInputRef = useRef<HTMLInputElement>(null);

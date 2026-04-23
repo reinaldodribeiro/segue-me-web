@@ -3,7 +3,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { DroppableSectionProps } from './types';
 
-const DroppableSection: React.FC<DroppableSectionProps> = ({ id, label, icon, filled, total, children }) => {
+const DroppableSection: SafeFC<DroppableSectionProps> = ({ id, label, icon, filled, total, children }) => {
   const { isOver, setNodeRef } = useDroppable({ id });
 
   return (

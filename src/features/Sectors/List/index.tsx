@@ -16,7 +16,7 @@ import { useTutorial } from '@/hooks/useTutorial';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
-const SectorsList: React.FC = () => {
+const SectorsList: SafeFC = () => {
   useTutorial();
   const { isSuperAdmin } = usePermissions();
 

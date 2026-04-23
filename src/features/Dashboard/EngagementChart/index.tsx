@@ -31,7 +31,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
   );
 };
 
-const EngagementChart: React.FC<EngagementChartProps> = ({ data }) => {
+const EngagementChart: SafeFC<EngagementChartProps> = ({ data }) => {
   const chartData = data.filter((d) => d.count > 0).map((d) => ({
     name: LABELS[d.level] ?? d.level,
     value: d.count,

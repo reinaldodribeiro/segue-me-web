@@ -7,7 +7,7 @@ import { storageUrl } from '@/utils/helpers';
 import { PersonRowProps } from './types';
 import { ENGAGEMENT_CONFIG } from './constants';
 
-const PersonRow: React.FC<PersonRowProps> = ({ person, onAdd, adding, aiReason, encounterYear }) => {
+const PersonRow: SafeFC<PersonRowProps> = ({ person, onAdd, adding, aiReason, encounterYear }) => {
   const photo = person.photo ? storageUrl(person.photo) : null;
   const displayName = personDisplayName(person);
   const initials = personInitials(person);

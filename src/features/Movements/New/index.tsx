@@ -14,7 +14,7 @@ import MovementService from '@/services/api/MovementService';
 import { queryKeys } from '@/lib/query/keys';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const NewMovement: React.FC = () => {
+const NewMovement: SafeFC = () => {
   useTutorial();
   const router = useRouter();
   const queryClient = useQueryClient();

@@ -23,7 +23,7 @@ interface FormErrors {
   name?: string;
 }
 
-const SectorDetail: React.FC = () => {
+const SectorDetail: SafeFC = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 

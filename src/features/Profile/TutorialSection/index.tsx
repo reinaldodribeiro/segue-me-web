@@ -6,10 +6,10 @@ import Button from '@/components/Button';
 import SectionCard from '@/components/SectionCard';
 import { useToast } from '@/hooks/useToast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
-import { useTutorialContext } from '@/context/TutorialContext';
+import { useTutorialContext } from '@/hooks/useTutorialContext';
 import UserService from '@/services/api/UserService';
 
-const TutorialSection: React.FC = () => {
+const TutorialSection: SafeFC = () => {
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const { resetTutorial } = useTutorialContext();

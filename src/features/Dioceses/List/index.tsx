@@ -8,7 +8,7 @@ import Input from '@/components/Input';
 import { useDioceseList } from '@/lib/query/hooks/useDioceses';
 import { useTutorial } from '@/hooks/useTutorial';
 
-const DiocesesList: React.FC = () => {
+const DiocesesList: SafeFC = () => {
   useTutorial();
   const [search, setSearch] = useState('');
 

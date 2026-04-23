@@ -7,7 +7,7 @@ import { personDisplayName, personInitials } from "@/utils/personDisplay";
 import { storageUrl } from "@/utils/helpers";
 import { DraggablePersonProps } from "./types";
 
-const DraggablePerson: React.FC<DraggablePersonProps> = ({ person, selected, onAdd, onInfo }) => {
+const DraggablePerson: SafeFC<DraggablePersonProps> = ({ person, selected, onAdd, onInfo }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: person.id });
   const photo = person.photo ? storageUrl(person.photo) : null;
   const initials = personInitials(person);
