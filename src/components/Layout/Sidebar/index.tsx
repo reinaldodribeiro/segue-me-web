@@ -35,7 +35,9 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
     () =>
       NAV_SECTIONS.map((section) => ({
         ...section,
-        items: section.items.filter((item: NavItemConfig) => canAccess(item.href)),
+        items: section.items.filter((item: NavItemConfig) =>
+          canAccess(item.href),
+        ),
       })).filter((section) => section.items.length > 0),
     [canAccess],
   );
@@ -131,7 +133,9 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
       <div className="border-t border-border px-2 py-3 space-y-0.5">
         {/* Theme toggle */}
         {isSidebarCollapsed ? (
-          <SidebarTooltip label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
+          <SidebarTooltip
+            label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+          >
             <button
               onClick={toggleTheme}
               className="flex items-center justify-center w-full rounded-lg px-3 py-2.5 text-text-muted hover:bg-hover hover:text-text transition-all"
