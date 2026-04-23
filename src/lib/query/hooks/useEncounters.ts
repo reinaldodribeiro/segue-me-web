@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import EncounterService from '@/services/api/EncounterService';
 import { EncounterPayload } from '@/interfaces/Encounter';
@@ -38,10 +38,30 @@ export function useEncounterTeams(id: string) {
   });
 }
 
-export function useEncounterAvailablePeople(id: string, params?: Record<string, unknown>) {
-  return useQuery({
-    queryKey: [...queryKeys.encounters.availablePeople(id), params ?? {}],
-    queryFn: () => EncounterService.availablePeople(id, params).then((r) => r.data.data),
+export interface AvailablePeopleFilters {
+  search?: string;
+  never_in_movement?: boolean;
+  priority?: boolean;
+}
+
+export function useEncounterAvailablePeople(id: string, filters?: AvailablePeopleFilters) {
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.encounters.availablePeople(id), filters ?? {}],
+    queryFn: async ({ pageParam }) => {
+      const response = await EncounterService.availablePeople(id, {
+        page: pageParam,
+        per_page: 15,
+        ...filters,
+      });
+      return response.data;
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.current_page < lastPage.meta.last_page) {
+        return lastPage.meta.current_page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!id,
   });
 }
@@ -50,6 +70,14 @@ export function useEncounterParticipants(id: string) {
   return useQuery({
     queryKey: queryKeys.encounters.participants(id),
     queryFn: () => EncounterService.listParticipants(id).then((r) => r.data.data),
+    enabled: !!id,
+  });
+}
+
+export function useEncounterPreviousParticipants(id: string) {
+  return useQuery({
+    queryKey: queryKeys.encounters.previousParticipants(id),
+    queryFn: () => EncounterService.previousParticipants(id).then((r) => r.data.data),
     enabled: !!id,
   });
 }

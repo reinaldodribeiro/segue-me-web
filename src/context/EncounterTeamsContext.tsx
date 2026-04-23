@@ -19,6 +19,9 @@ interface EncounterTeamsContextValue {
   filteredAvailable: Person[];
   loadingTeams: boolean;
   loadingPeople: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean;
+  totalAvailable: number;
   syncing: boolean;
   selectedTeamId: string | null;
   selectedTeam: Team | undefined;
@@ -35,6 +38,8 @@ interface EncounterTeamsContextValue {
   setSearchPeople: (s: string) => void;
   setFilterType: (s: string) => void;
   setFilterWorkedInTeam: (v: boolean) => void;
+  // Pagination
+  fetchNextPage: () => void;
   // Actions
   syncTeams: () => Promise<void>;
   addMember: (personId: string, role: TeamMemberRole, teamId?: string) => Promise<void>;
@@ -66,10 +71,36 @@ export function EncounterTeamsProvider({
   const [searchPeople, setSearchPeople] = useState('');
   const debouncedPeopleSearch = useDebounce(searchPeople, 400);
 
-  const { data: available = [], isLoading: loadingPeople } = useEncounterAvailablePeople(
+  const {
+    data: availablePages,
+    isLoading: loadingPeople,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useEncounterAvailablePeople(
     encounterId,
     debouncedPeopleSearch ? { search: debouncedPeopleSearch } : undefined,
   );
+
+  // Flatten paginated pages into a single array, deduplicating by ID
+  // (page offsets can shift after add/remove, causing overlap between pages)
+  const available: Person[] = (() => {
+    if (!availablePages?.pages) return [];
+    const seen = new Set<string>();
+    const result: Person[] = [];
+    for (const page of availablePages.pages) {
+      for (const person of page.data) {
+        if (!seen.has(person.id)) {
+          seen.add(person.id);
+          result.push(person);
+        }
+      }
+    }
+    return result;
+  })();
+
+  // Total from the last page meta (reflects server-side count)
+  const totalAvailable = availablePages?.pages[availablePages.pages.length - 1]?.meta.total ?? 0;
 
   const [syncing, setSyncing] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -163,6 +194,7 @@ export function EncounterTeamsProvider({
   const teamsComplete  = teams.filter((t) => t.is_full).length;
   const selectedTeam   = teams.find((t) => t.id === selectedTeamId);
 
+  // Client-side filters applied on top of server-side search
   const filteredAvailable = available.filter((p) => {
     if (filterType && p.type !== filterType) return false;
     if (filterWorkedInTeam && selectedTeam?.movement_team_id) {
@@ -174,7 +206,9 @@ export function EncounterTeamsProvider({
   return (
     <EncounterTeamsContext.Provider value={{
       encounterId,
-      teams, available, filteredAvailable, loadingTeams, loadingPeople, syncing,
+      teams, available, filteredAvailable, loadingTeams, loadingPeople,
+      isFetchingNextPage, hasNextPage, totalAvailable,
+      fetchNextPage, syncing,
       selectedTeamId, selectedTeam, searchPeople, filterType, filterWorkedInTeam,
       totalSlots, totalFilled, totalConfirmed, teamsComplete,
       setSelectedTeamId, setSearchPeople, setFilterType, setFilterWorkedInTeam,

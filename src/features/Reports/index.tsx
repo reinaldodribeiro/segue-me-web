@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Download, Loader2, Star, TrendingUp, Users, Calendar } from 'lucide-react';
-import { Encounter } from '@/interfaces/Encounter';
-import EncounterService from '@/services/api/EncounterService';
 import PersonService from '@/services/api/PersonService';
 import { useAnalytics } from '@/context/AnalyticsContext';
+import { useEncounterList } from '@/lib/query/hooks/useEncounters';
 import ParishFilter from '@/components/ParishFilter';
 import EncounterDetail from './EncounterDetail';
 import { ENGAGEMENT_LEVEL_CONFIG, ENGAGEMENT_LEVELS_ORDER } from './constants';
@@ -52,21 +51,19 @@ function StatCard({ icon, label, value, sub, iconBg }: {
 const Reports: React.FC = () => {
   useTutorial();
   const { filter, engagement, loadingEngagement } = useAnalytics();
-  const { selectedParishId, selectedParishName, scopedParishIds, loadingScope, isAboveParish } = filter;
+  const { selectedParishId, selectedParishName, loadingScope, isAboveParish } = filter;
 
-  const [encounters, setEncounters]               = useState<Encounter[]>([]);
-  const [loadingEncounters, setLoadingEncounters] = useState(true);
-  const [exportingExcel, setExportingExcel]       = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   /* ── encounters: scope by parish when selected ───────────────────── */
-  useEffect(() => {
-    setLoadingEncounters(true);
+  const encounterParams = useMemo<Record<string, unknown>>(() => {
     const params: Record<string, unknown> = { per_page: 100 };
     if (isAboveParish && selectedParishId) params.parish_id = selectedParishId;
-    EncounterService.paginated(params)
-      .then((res) => setEncounters(res.data.data))
-      .finally(() => setLoadingEncounters(false));
-  }, [selectedParishId, isAboveParish]);
+    return params;
+  }, [isAboveParish, selectedParishId]);
+
+  const { data: encounterData, isLoading: loadingEncounters } = useEncounterList(encounterParams);
+  const encounters = encounterData?.data ?? [];
 
   /* ── derived data ─────────────────────────────────────────────────── */
   const donutData = useMemo(() =>

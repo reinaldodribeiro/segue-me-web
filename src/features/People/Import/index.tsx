@@ -92,17 +92,20 @@ const PeopleImport: React.FC<PeopleImportProps> = ({ parishId, onClose, onSucces
 
         <div className="p-5 space-y-4">
           {/* Download template */}
-          <div className="flex items-center justify-between bg-hover/40 rounded-xl px-4 py-3">
+          <div className="bg-hover/40 rounded-xl px-4 py-3 space-y-2">
             <div>
               <p className="text-xs font-medium text-text">Planilha modelo</p>
-              <p className="text-xs text-text-muted mt-0.5">Baixe e preencha o modelo oficial</p>
+              <p className="text-xs text-text-muted mt-0.5">Baixe o modelo do tipo desejado e preencha</p>
             </div>
             <div className="flex gap-2">
               <a href="/samples/pessoas_exemplo.csv" download>
-                <Button size="sm" variant="secondary" leftIcon={<Download size={13} />}>Exemplo</Button>
+                <Button size="sm" variant="secondary" leftIcon={<Download size={13} />} className="whitespace-nowrap">Exemplo</Button>
               </a>
-              <a href={PersonService.importTemplateUrl()} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="secondary" leftIcon={<Download size={13} />}>Modelo</Button>
+              <a href={PersonService.importTemplateUrl('youth')} target="_blank" rel="noreferrer">
+                <Button size="sm" variant="secondary" leftIcon={<Download size={13} />} className="whitespace-nowrap">Modelo Jovens</Button>
+              </a>
+              <a href={PersonService.importTemplateUrl('couple')} target="_blank" rel="noreferrer">
+                <Button size="sm" variant="secondary" leftIcon={<Download size={13} />} className="whitespace-nowrap">Modelo Casais</Button>
               </a>
             </div>
           </div>

@@ -18,6 +18,7 @@ export const queryKeys = {
     summary: (id: string) => [...queryKeys.encounters.detail(id), 'summary'] as const,
     teams: (id: string) => [...queryKeys.encounters.detail(id), 'teams'] as const,
     availablePeople: (id: string) => [...queryKeys.encounters.detail(id), 'available-people'] as const,
+    previousParticipants: (id: string) => [...queryKeys.encounters.detail(id), 'previous-participants'] as const,
     participants: (id: string) => [...queryKeys.encounters.detail(id), 'participants'] as const,
     analysis: (id: string) => [...queryKeys.encounters.detail(id), 'analysis'] as const,
   },

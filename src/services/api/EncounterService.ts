@@ -31,7 +31,10 @@ class EncounterService extends CrudService<Encounter, EncounterPayload> {
   }
 
   /** GET /encounters/{encounter}/available-people */
-  availablePeople(id: string, params?: Record<string, unknown>): Promise<AxiosResponse<{ data: Person[] }>> {
+  availablePeople(
+    id: string,
+    params?: { page?: number; per_page?: number; search?: string; never_in_movement?: boolean; priority?: boolean },
+  ): Promise<AxiosResponse<PaginatedResponse<Person>>> {
     return api.get(`encounters/${id}/available-people`, { params });
   }
 
@@ -140,6 +143,11 @@ class EncounterService extends CrudService<Encounter, EncounterPayload> {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  /** GET /encounters/{id}/previous-participants */
+  previousParticipants(id: string): Promise<AxiosResponse<{ data: string[] }>> {
+    return api.get(`encounters/${id}/previous-participants`);
   }
 
   /** Paginated list */

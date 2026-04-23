@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Users, RefreshCw, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
 import Button from '@/components/Button';
@@ -36,11 +36,14 @@ const UsersList: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 400);
 
-  const params: Record<string, unknown> = { per_page: 20, page };
-  if (debouncedSearch) params.search = debouncedSearch;
-  if (filterRole) params.role = filterRole;
-  if (filterStatus === 'active') params.active = 1;
-  if (filterStatus === 'inactive') params.active = 0;
+  const params = useMemo(() => {
+    const p: Record<string, unknown> = { per_page: 20, page };
+    if (debouncedSearch) p.search = debouncedSearch;
+    if (filterRole) p.role = filterRole;
+    if (filterStatus === 'active') p.active = 1;
+    if (filterStatus === 'inactive') p.active = 0;
+    return p;
+  }, [page, debouncedSearch, filterRole, filterStatus]);
 
   const { data, isLoading: loading, isError } = useUserList(params);
   const users = data?.data ?? [];

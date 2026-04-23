@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Search, RefreshCw, ClipboardList } from 'lucide-react';
 import Input from '@/components/Input';
 import DateInput from '@/components/DateInput';
@@ -40,10 +40,13 @@ const AuditList: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 400);
 
-  const params: Record<string, unknown> = { per_page: 25, page };
-  if (debouncedSearch) params.search = debouncedSearch;
-  if (from) params.from = from;
-  if (to) params.to = to;
+  const params = useMemo(() => {
+    const p: Record<string, unknown> = { per_page: 25, page };
+    if (debouncedSearch) p.search = debouncedSearch;
+    if (from) p.from = from;
+    if (to) p.to = to;
+    return p;
+  }, [page, debouncedSearch, from, to]);
 
   const { data, isLoading: loading, isError } = useAuditList(params);
   const logs = data?.data ?? [];

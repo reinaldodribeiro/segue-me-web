@@ -19,6 +19,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/hooks/useAuth';
 import { useHierarchyCascade } from '@/hooks/useHierarchyCascade';
 import { cn } from '@/utils/helpers';
+import { useTutorial } from '@/hooks/useTutorial';
 
 function normalizeRole(r: UserRole | { name: string }): UserRole {
   return (typeof r === 'string' ? r : r.name) as UserRole;
@@ -46,6 +47,7 @@ interface InfoErrors {
 }
 
 const UserDetail: React.FC = () => {
+  useTutorial();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { isSuperAdmin, isDioceseAdmin, isSectorAdmin } = usePermissions();
@@ -243,7 +245,7 @@ const UserDetail: React.FC = () => {
           </div>
         </div>
         {!isSelf && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" data-tutorial="user-detail-toggle-active">
             <Button variant="secondary" size="sm" leftIcon={<ToggleLeft size={14} />}
               loading={togglingActive} onClick={handleToggleActive}>
               {targetUser?.active ? 'Desativar' : 'Ativar'}
@@ -278,7 +280,7 @@ const UserDetail: React.FC = () => {
         ) : null}
       </div>
 
-      <SectionCard title="Informações do Usuário">
+      <SectionCard title="Informações do Usuário" data-tutorial="user-detail-form">
         <form onSubmit={saveInfo} noValidate className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label="Nome *" name="name" placeholder="Nome completo"

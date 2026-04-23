@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ArrowLeft, Mail, User as UserIcon, Lock, ShieldCheck } from 'lucide-react';
 import Button from '@/components/Button';
@@ -15,7 +16,9 @@ import { Movement } from '@/interfaces/Movement';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/hooks/useAuth';
 import { useHierarchyCascade } from '@/hooks/useHierarchyCascade';
+import { queryKeys } from '@/lib/query/keys';
 import { cn } from '@/utils/helpers';
+import { useTutorial } from '@/hooks/useTutorial';
 
 const SECTOR_ROLES: UserRole[] = ['sector_admin'];
 const PARISH_ROLES: UserRole[] = ['parish_admin', 'coordinator'];
@@ -43,7 +46,9 @@ interface FormErrors {
 }
 
 const NewUser: React.FC = () => {
+  useTutorial();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isSuperAdmin, isDioceseAdmin, isSectorAdmin, isParishAdmin } = usePermissions();
   const { user } = useAuth();
 
@@ -164,6 +169,7 @@ const NewUser: React.FC = () => {
         await AdminUserService.syncMovements(newUserId, selectedMovementIds);
       }
 
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       router.push(`/app/users/${newUserId}`);
     } catch (err: unknown) {
       setSubmitError((err as { data?: { message?: string } })?.data?.message ?? 'Erro ao criar usuário.');
@@ -194,7 +200,7 @@ const NewUser: React.FC = () => {
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="bg-panel border border-border rounded-xl p-6 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-tutorial="new-user-basic">
             <Input label="Nome *" name="name" placeholder="Nome completo"
               value={form.name} onChange={(e) => set('name', e.target.value)}
               error={errors.name} startIcon={<UserIcon size={16} />} />
@@ -212,15 +218,18 @@ const NewUser: React.FC = () => {
               error={errors.password_confirmation} startIcon={<Lock size={16} />} />
           </div>
 
-          <Select label="Perfil *" name="role" value={form.role}
-            onChange={(e) => handleRoleChange(e.target.value as UserRole | '')}
-            error={errors.role}>
-            <option value="">Selecione o perfil</option>
-            {availableRoles.map((r) => (
-              <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-            ))}
-          </Select>
+          <div data-tutorial="new-user-role">
+            <Select label="Perfil *" name="role" value={form.role}
+              onChange={(e) => handleRoleChange(e.target.value as UserRole | '')}
+              error={errors.role}>
+              <option value="">Selecione o perfil</option>
+              {availableRoles.map((r) => (
+                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+              ))}
+            </Select>
+          </div>
 
+          <div data-tutorial="new-user-hierarchy">
           {needsDiocese && isSuperAdmin && (
             <Select label="Diocese *" name="dioceseId" value={form.dioceseId}
               onChange={(e) => { set('dioceseId', e.target.value); setForm((p) => ({ ...p, sectorId: '', parishId: '' })); }}
@@ -247,6 +256,7 @@ const NewUser: React.FC = () => {
               {parishes.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </Select>
           )}
+          </div>
 
           {/* Movement access (coordinators) */}
           {isCoordinatorRole && allMovements.length > 0 && (

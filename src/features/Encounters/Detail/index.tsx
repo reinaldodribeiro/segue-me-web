@@ -137,7 +137,7 @@ const EncounterDetail: React.FC<EncounterDetailProps> = ({ id }) => {
         const incompleteTeams = summary?.teams.filter((t) => t.is_below_minimum) ?? [];
         const blocked = noTeams || incompleteTeams.length > 0;
         return (
-          <div className="bg-panel border border-border rounded-xl p-4 space-y-2">
+          <div className="bg-panel border border-border rounded-xl p-4 space-y-2" data-tutorial="encounter-detail-status">
             <div className="flex items-center gap-3">
               <span className="text-sm text-text-muted">Avançar status:</span>
               {encounter.status === 'draft' && (

@@ -124,7 +124,12 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({ children }) 
     }
     if (idx !== currentStep) {
       if (idx >= filteredSteps.length) {
-        // All remaining steps have no DOM element — close gracefully
+        // All remaining steps have no DOM element — close gracefully.
+        // If at least one step was already shown, mark the route as seen so
+        // the tutorial does not fire again on the next visit.
+        if (currentStep > 0 && activeRoute) {
+          markRouteAsSeen(activeRoute);
+        }
         setIsActive(false);
       } else {
         setCurrentStep(idx);
@@ -169,10 +174,14 @@ export const TutorialProvider: React.FC<TutorialProviderProps> = ({ children }) 
     setCurrentStep((prev) => {
       const next = prev + 1;
       if (next >= filteredSteps.length) {
+        // Completed all steps — mark seen and close.
         setIsActive(false);
         if (activeRoute) markRouteAsSeen(activeRoute);
         return prev;
       }
+      // Advance; if the next step has no DOM element the useEffect above will
+      // continue skipping until it finds one or exhausts all steps (where it
+      // will call markRouteAsSeen because currentStep > 0).
       return next;
     });
   }, [filteredSteps.length, activeRoute, markRouteAsSeen]);

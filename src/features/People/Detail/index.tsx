@@ -40,6 +40,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query/keys";
 import Tooltip from "@/components/Tooltip";
 import { storageUrl, cn } from "@/utils/helpers";
+import { useTutorial } from "@/hooks/useTutorial";
 
 const ENGAGEMENT_CONFIG: Record<EngagementLevel, { classes: string; Icon: React.ElementType }> = {
   baixo:    { classes: "text-slate-500 bg-slate-100",   Icon: TrendingUp },
@@ -65,6 +66,7 @@ import HistorySection from './HistorySection';
 import TeamExperiencesSection from './TeamExperiencesSection';
 
 const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
+  useTutorial();
   const router = useRouter();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
@@ -313,7 +315,7 @@ const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
       {/* Header with photo upload */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4" data-tutorial="person-detail-header">
         <div className="relative shrink-0">
           {person.photo ? (
             <img
@@ -363,7 +365,7 @@ const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
               </span>
             )}
           </p>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1" data-tutorial="person-detail-engagement-score">
             {(() => {
               const { classes, Icon } = ENGAGEMENT_CONFIG[person.engagement_level];
               return (
@@ -423,7 +425,7 @@ const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
       </div>
 
       {/* Edit form */}
-      <form id="person-form" onSubmit={handleSave} className="space-y-5">
+      <form id="person-form" onSubmit={handleSave} className="space-y-5" data-tutorial="person-detail-edit-form">
         <SectionCard title="Dados Pessoais">
           <div className="space-y-4">
             <Select
@@ -868,13 +870,17 @@ const PersonDetail: React.FC<PersonDetailProps> = ({ id }) => {
         )}
       </form>
 
-      <TeamExperiencesSection
-        personId={id}
-        initialExperiences={experiences}
-        canEdit={canEdit}
-      />
+      <div data-tutorial="person-detail-experiences">
+        <TeamExperiencesSection
+          personId={id}
+          initialExperiences={experiences}
+          canEdit={canEdit}
+        />
+      </div>
 
-      <HistorySection history={history} />
+      <div data-tutorial="person-detail-history">
+        <HistorySection history={history} />
+      </div>
 
       {/* Actions */}
       {canEdit && (

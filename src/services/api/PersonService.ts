@@ -43,9 +43,10 @@ class PersonService extends CrudService<Person, PersonPayload> {
     return api.get('people/import/status', { params: { cache_key: cacheKey } });
   }
 
-  /** GET /people/import/template */
-  importTemplateUrl(): string {
-    return `${process.env.NEXT_PUBLIC_API_URL}/people/import/template`;
+  /** GET /people/import/template?type=youth|couple */
+  importTemplateUrl(type?: 'youth' | 'couple'): string {
+    const base = `${process.env.NEXT_PUBLIC_API_URL}/people/import/template`;
+    return type ? `${base}?type=${type}` : base;
   }
 
   /** GET /people/export/excel — returns blob for authenticated download */

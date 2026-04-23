@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useLayout } from "@/hooks/useLayout";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,8 +31,19 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
         .toUpperCase()
     : "?";
 
-  const visibleItems = (items: NavItemConfig[]) =>
-    items.filter((item) => canAccess(item.href));
+  const filteredSections = useMemo(
+    () =>
+      NAV_SECTIONS.map((section) => ({
+        ...section,
+        items: section.items.filter((item: NavItemConfig) => canAccess(item.href)),
+      })).filter((section) => section.items.length > 0),
+    [canAccess],
+  );
+
+  const filteredBottomNav = useMemo(
+    () => BOTTOM_NAV.filter((item: NavItemConfig) => canAccess(item.href)),
+    [canAccess],
+  );
 
   return (
     <aside className="h-full flex flex-col bg-panel border-r border-border overflow-hidden">
@@ -80,30 +91,25 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
 
       {/* Main nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
-        {NAV_SECTIONS.map((section) => {
-          const items = visibleItems(section.items);
-          if (items.length === 0) return null;
-
-          return (
-            <div key={section.label ?? "_root"}>
-              {section.label && !isSidebarCollapsed && (
-                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60 select-none">
-                  {section.label}
-                </p>
-              )}
-              <div className="space-y-0.5">
-                {items.map((item) => (
-                  <NavItem
-                    key={item.href}
-                    {...item}
-                    collapsed={isSidebarCollapsed}
-                    onClick={onNavClick}
-                  />
-                ))}
-              </div>
+        {filteredSections.map((section) => (
+          <div key={section.label ?? "_root"}>
+            {section.label && !isSidebarCollapsed && (
+              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60 select-none">
+                {section.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((item) => (
+                <NavItem
+                  key={item.href}
+                  {...item}
+                  collapsed={isSidebarCollapsed}
+                  onClick={onNavClick}
+                />
+              ))}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </nav>
 
       {/* Divider */}
@@ -111,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({ onNavClick }) => {
 
       {/* Bottom nav */}
       <nav className="px-2 py-3 space-y-0.5">
-        {visibleItems(BOTTOM_NAV).map((item) => (
+        {filteredBottomNav.map((item) => (
           <NavItem
             key={item.href}
             {...item}

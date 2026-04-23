@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -14,25 +14,20 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
 import Pagination from "@/components/Pagination";
-import { PaginationMeta } from "@/components/Pagination/types";
-import { Diocese, Sector } from "@/interfaces/Parish";
-import ParishService from "@/services/api/ParishService";
-import DioceseService from "@/services/api/DioceseService";
-import SectorService from "@/services/api/SectorService";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { storageUrl } from "@/utils/helpers";
 import { Parish } from "@/interfaces/Parish";
+import { useParishList } from "@/lib/query/hooks/useParishes";
+import { useHierarchyDioceses } from "@/lib/query/hooks/useHierarchy";
+import { useSectorList } from "@/lib/query/hooks/useSectors";
+import { useTutorial } from "@/hooks/useTutorial";
 
 type StatusFilter = "all" | "active" | "inactive";
 
 const ParishesList: React.FC = () => {
+  useTutorial();
   const { isSuperAdmin, isDioceseAdmin } = usePermissions();
-
-  const [parishes, setParishes] = useState<Parish[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
   const [filterDiocese, setFilterDiocese] = useState("");
@@ -42,49 +37,32 @@ const ParishesList: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 400);
 
-  // Dropdown data (loaded once)
-  const [dioceses, setDioceses] = useState<Diocese[]>([]);
-  const [allSectors, setAllSectors] = useState<Sector[]>([]);
-
-  useEffect(() => {
-    if (isSuperAdmin) {
-      Promise.all([
-        DioceseService.list({ per_page: 200 }),
-        SectorService.list({ per_page: 200 }),
-      ]).then(([d, s]) => {
-        setDioceses(d.data.data);
-        setAllSectors(s.data.data);
-      });
-    } else if (isDioceseAdmin) {
-      SectorService.list({ per_page: 200 }).then((s) =>
-        setAllSectors(s.data.data),
-      );
-    }
-  }, [isSuperAdmin, isDioceseAdmin]);
+  // Dropdown data via TanStack Query
+  const { data: dioceses = [] } = useHierarchyDioceses(isSuperAdmin);
+  const { data: sectorData } = useSectorList(
+    isSuperAdmin || isDioceseAdmin ? { per_page: 200 } : {},
+  );
+  const allSectors = sectorData?.data ?? [];
 
   const visibleSectors = useMemo(() => {
     if (!filterDiocese) return allSectors;
     return allSectors.filter((s) => s.diocese_id === filterDiocese);
   }, [allSectors, filterDiocese]);
 
-  // Fetch parishes (server-side filtered)
-  useEffect(() => {
-    setLoading(true);
-    const params: Record<string, unknown> = { per_page: 20, page };
-    if (debouncedSearch) params.name = debouncedSearch;
-    if (filterSector) params.sector_id = filterSector;
-    else if (filterDiocese) params.diocese_id = filterDiocese;
-    if (filterStatus === "active") params.active = 1;
-    if (filterStatus === "inactive") params.active = 0;
+  // Parish list params
+  const parishParams = useMemo(() => {
+    const p: Record<string, unknown> = { per_page: 20, page };
+    if (debouncedSearch) p.name = debouncedSearch;
+    if (filterSector) p.sector_id = filterSector;
+    else if (filterDiocese) p.diocese_id = filterDiocese;
+    if (filterStatus === "active") p.active = 1;
+    if (filterStatus === "inactive") p.active = 0;
+    return p;
+  }, [page, debouncedSearch, filterDiocese, filterSector, filterStatus]);
 
-    ParishService.list(params)
-      .then((res) => {
-        setParishes(res.data.data);
-        setMeta(res.data.meta);
-      })
-      .catch(() => setError("Erro ao carregar paróquias."))
-      .finally(() => setLoading(false));
-  }, [debouncedSearch, filterDiocese, filterSector, filterStatus, page]);
+  const { data: parishData, isLoading: loading, isError } = useParishList(parishParams);
+  const parishes: Parish[] = parishData?.data ?? [];
+  const meta = parishData?.meta ?? null;
 
   function handleDioceseChange(e: React.ChangeEvent<HTMLSelectElement>) {
     setFilterDiocese(e.target.value);
@@ -202,8 +180,8 @@ const ParishesList: React.FC = () => {
             <RefreshCw size={20} className="animate-spin" />
             <span className="text-sm">Carregando paróquias...</span>
           </div>
-        ) : error ? (
-          <div className="py-16 text-center text-sm text-red-500">{error}</div>
+        ) : isError ? (
+          <div className="py-16 text-center text-sm text-red-500">Erro ao carregar paróquias.</div>
         ) : parishes.length === 0 ? (
           <div className="py-20 text-center">
             {hasFilters ? (

@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ArrowLeft, Landmark } from 'lucide-react';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Toggle from '@/components/Toggle';
 import DioceseService from '@/services/api/DioceseService';
+import { queryKeys } from '@/lib/query/keys';
 
 interface FormState {
   name: string;
@@ -20,6 +22,7 @@ interface FormErrors {
 
 const NewDiocese: React.FC = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>({ name: '', active: true });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -39,6 +42,8 @@ const NewDiocese: React.FC = () => {
     setSubmitError('');
     try {
       const res = await DioceseService.save({ name: form.name.trim(), active: form.active });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dioceses.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.hierarchy.all });
       router.push(`/app/dioceses/${res.data.data.id}`);
     } catch (err: unknown) {
       setSubmitError(

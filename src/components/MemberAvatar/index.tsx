@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { X, UserCircle } from "lucide-react";
 import {
   TEAM_MEMBER_STATUS_LABELS,
@@ -17,58 +17,185 @@ import PersonProfileDrawer from "@/components/PersonProfileDrawer";
 import { MemberAvatarProps } from "./types";
 import { TYPE_COLOR, STATUS_DOT, STATUS_ICON } from "./constants";
 
-const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
-  const { removeMember, updateMemberStatus } = useEncounterTeams();
-  const [open, setOpen] = useState(false);
-  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
-  const [profileOpen, setProfileOpen] = useState(false);
+/* ─── RemoveModal ────────────────────────────────────────────────── */
+
+interface RemoveModalProps {
+  open: boolean;
+  displayName: string;
+  onClose: () => void;
+  onConfirm: (reason: string) => Promise<void>;
+}
+
+const RemoveModal = memo(function RemoveModal({
+  open,
+  displayName,
+  onClose,
+  onConfirm,
+}: RemoveModalProps) {
+  const [removeReason, setRemoveReason] = useState("");
+  const [removing, setRemoving] = useState(false);
+
+  // Reset reason when modal opens
+  useEffect(() => {
+    if (open) setRemoveReason("");
+  }, [open]);
+
+  if (!open) return null;
+
+  async function handleConfirm() {
+    if (!removeReason.trim()) return;
+    setRemoving(true);
+    await onConfirm(removeReason.trim());
+    setRemoving(false);
+  }
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+        onClick={() => !removing && onClose()}
+      />
+      <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-panel border border-border rounded-2xl shadow-2xl w-80 p-5 space-y-4">
+        <div>
+          <p className="text-sm font-semibold text-text">
+            Remover membro confirmado
+          </p>
+          <p className="text-xs text-text-muted mt-1">
+            <span className="font-medium text-text">{displayName}</span> já
+            confirmou presença. Informe o motivo da remoção.
+          </p>
+        </div>
+        <textarea
+          autoFocus
+          value={removeReason}
+          onChange={(e) => setRemoveReason(e.target.value)}
+          placeholder="Ex: indisponibilidade, substituição..."
+          rows={3}
+          className="w-full text-xs rounded-xl border border-input-border bg-input-bg text-input-text px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setRemoveReason("");
+              onClose();
+            }}
+            disabled={removing}
+            className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-hover transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!removeReason.trim() || removing}
+            className="flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {removing ? "Removendo…" : "Confirmar remoção"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+});
+
+/* ─── RefusalModal ───────────────────────────────────────────────── */
+
+interface RefusalModalProps {
+  open: boolean;
+  displayName: string;
+  onClose: () => void;
+  onConfirm: (reason: string) => Promise<void>;
+}
+
+const RefusalModal = memo(function RefusalModal({
+  open,
+  displayName,
+  onClose,
+  onConfirm,
+}: RefusalModalProps) {
+  const [refusalReason, setRefusalReason] = useState("");
+  const [refusing, setRefusing] = useState(false);
+
+  // Reset reason when modal opens
+  useEffect(() => {
+    if (open) setRefusalReason("");
+  }, [open]);
+
+  if (!open) return null;
+
+  async function handleConfirm() {
+    if (!refusalReason.trim()) return;
+    setRefusing(true);
+    await onConfirm(refusalReason.trim());
+    setRefusing(false);
+  }
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+        onClick={() => !refusing && onClose()}
+      />
+      <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-panel border border-border rounded-2xl shadow-2xl w-80 p-5 space-y-4">
+        <div>
+          <p className="text-sm font-semibold text-text">
+            Marcar como recusado
+          </p>
+          <p className="text-xs text-text-muted mt-1">
+            Informe o motivo da recusa de{" "}
+            <span className="font-medium text-text">{displayName}</span>.
+          </p>
+        </div>
+        <textarea
+          autoFocus
+          value={refusalReason}
+          onChange={(e) => setRefusalReason(e.target.value)}
+          placeholder="Ex: indisponibilidade, viagem..."
+          rows={3}
+          className="w-full text-xs rounded-xl border border-input-border bg-input-bg text-input-text px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setRefusalReason("");
+              onClose();
+            }}
+            disabled={refusing}
+            className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-hover transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!refusalReason.trim() || refusing}
+            className="flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {refusing ? "Salvando…" : "Confirmar recusa"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+});
+
+/* ─── ProfileDrawer ──────────────────────────────────────────────── */
+
+interface ProfileDrawerProps {
+  open: boolean;
+  member: MemberAvatarProps["member"];
+  onClose: () => void;
+}
+
+const ProfileDrawer = memo(function ProfileDrawer({
+  open,
+  member,
+  onClose,
+}: ProfileDrawerProps) {
   const [loadingExps, setLoadingExps] = useState(false);
   const [experiences, setExperiences] = useState<PersonTeamExperience[]>([]);
   const [historyData, setHistoryData] = useState<PersonHistory[]>([]);
-  const [removeModalOpen, setRemoveModalOpen] = useState(false);
-  const [removeReason, setRemoveReason] = useState("");
-  const [removing, setRemoving] = useState(false);
-  const [refusalModalOpen, setRefusalModalOpen] = useState(false);
-  const [refusalReason, setRefusalReason] = useState("");
-  const [refusing, setRefusing] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  async function handleRemove() {
-    if (member.status === "confirmed" && !removeReason.trim()) return;
-    setRemoving(true);
-    await removeMember(member.id, removeReason.trim() || undefined);
-    setRemoving(false);
-    setRemoveModalOpen(false);
-    setRemoveReason("");
-    setOpen(false);
-  }
-
-  function requestRemove() {
-    setOpen(false);
-    if (member.status === "confirmed") {
-      setRemoveModalOpen(true);
-    } else {
-      removeMember(member.id);
-    }
-  }
-
-  function requestRefusal() {
-    setOpen(false);
-    setRefusalReason("");
-    setRefusalModalOpen(true);
-  }
-
-  async function handleRefusal() {
-    if (!refusalReason.trim()) return;
-    setRefusing(true);
-    await updateMemberStatus(member.id, "refused", refusalReason.trim());
-    setRefusing(false);
-    setRefusalModalOpen(false);
-    setRefusalReason("");
-  }
 
   useEffect(() => {
-    if (!profileOpen || !member.person) return;
+    if (!open || !member.person) return;
     async function load() {
       setLoadingExps(true);
       try {
@@ -81,7 +208,65 @@ const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
       }
     }
     load();
-  }, [profileOpen, member.person?.id]);
+  }, [open, member.person?.id]);
+
+  return (
+    <Drawer open={open} onClose={onClose} title="Perfil">
+      {member.person && (
+        <PersonProfileDrawer
+          person={member.person}
+          experiences={experiences}
+          historyData={historyData}
+          loadingExps={loadingExps}
+          memberStatus={member.status}
+          onClose={onClose}
+        />
+      )}
+    </Drawer>
+  );
+});
+
+/* ─── MemberAvatar ───────────────────────────────────────────────── */
+
+const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
+  const { removeMember, updateMemberStatus } = useEncounterTeams();
+  const [open, setOpen] = useState(false);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [refusalModalOpen, setRefusalModalOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleRemoveConfirm = useCallback(
+    async (reason: string) => {
+      await removeMember(member.id, reason || undefined);
+      setRemoveModalOpen(false);
+      setOpen(false);
+    },
+    [removeMember, member.id],
+  );
+
+  const handleRefusalConfirm = useCallback(
+    async (reason: string) => {
+      await updateMemberStatus(member.id, "refused", reason);
+      setRefusalModalOpen(false);
+    },
+    [updateMemberStatus, member.id],
+  );
+
+  function requestRemove() {
+    setOpen(false);
+    if (member.status === "confirmed") {
+      setRemoveModalOpen(true);
+    } else {
+      removeMember(member.id);
+    }
+  }
+
+  function requestRefusal() {
+    setOpen(false);
+    setRefusalModalOpen(true);
+  }
 
   function handleToggle() {
     if (!open && buttonRef.current) {
@@ -90,6 +275,10 @@ const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
     }
     setOpen((v) => !v);
   }
+
+  const handleProfileClose = useCallback(() => setProfileOpen(false), []);
+  const handleRemoveModalClose = useCallback(() => setRemoveModalOpen(false), []);
+  const handleRefusalModalClose = useCallback(() => setRefusalModalOpen(false), []);
 
   const colors = TYPE_COLOR[member.person?.type ?? "youth"];
   const initials = memberInitials(member);
@@ -109,7 +298,7 @@ const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
           `}
         >
           {photo ? (
-            <img src={photo} alt={displayName} className="w-full h-full object-cover" />
+            <img src={photo} alt={displayName} width={48} height={48} loading="lazy" className="w-full h-full object-cover" />
           ) : (
             <div
               className={`w-full h-full flex items-center justify-center text-sm font-bold
@@ -149,6 +338,7 @@ const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
                   alt={displayName}
                   width={32}
                   height={32}
+                  loading="lazy"
                   className="w-8 h-8 rounded-full object-cover shrink-0"
                 />
               ) : (
@@ -216,120 +406,29 @@ const MemberAvatar: React.FC<MemberAvatarProps> = ({ member }) => {
       )}
 
       {/* Remove reason modal */}
-      {removeModalOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
-            onClick={() => !removing && setRemoveModalOpen(false)}
-          />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-panel border border-border rounded-2xl shadow-2xl w-80 p-5 space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-text">
-                Remover membro confirmado
-              </p>
-              <p className="text-xs text-text-muted mt-1">
-                <span className="font-medium text-text">{displayName}</span> já
-                confirmou presença. Informe o motivo da remoção.
-              </p>
-            </div>
-            <textarea
-              autoFocus
-              value={removeReason}
-              onChange={(e) => setRemoveReason(e.target.value)}
-              placeholder="Ex: indisponibilidade, substituição..."
-              rows={3}
-              className="w-full text-xs rounded-xl border border-input-border bg-input-bg text-input-text px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setRemoveModalOpen(false);
-                  setRemoveReason("");
-                }}
-                disabled={removing}
-                className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-hover transition-colors disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleRemove}
-                disabled={!removeReason.trim() || removing}
-                className="flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {removing ? "Removendo…" : "Confirmar remoção"}
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      <RemoveModal
+        open={removeModalOpen}
+        displayName={displayName}
+        onClose={handleRemoveModalClose}
+        onConfirm={handleRemoveConfirm}
+      />
 
       {/* Refusal reason modal */}
-      {refusalModalOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
-            onClick={() => !refusing && setRefusalModalOpen(false)}
-          />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-panel border border-border rounded-2xl shadow-2xl w-80 p-5 space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-text">
-                Marcar como recusado
-              </p>
-              <p className="text-xs text-text-muted mt-1">
-                Informe o motivo da recusa de{" "}
-                <span className="font-medium text-text">{displayName}</span>.
-              </p>
-            </div>
-            <textarea
-              autoFocus
-              value={refusalReason}
-              onChange={(e) => setRefusalReason(e.target.value)}
-              placeholder="Ex: indisponibilidade, viagem..."
-              rows={3}
-              className="w-full text-xs rounded-xl border border-input-border bg-input-bg text-input-text px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setRefusalModalOpen(false);
-                  setRefusalReason("");
-                }}
-                disabled={refusing}
-                className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-hover transition-colors disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleRefusal}
-                disabled={!refusalReason.trim() || refusing}
-                className="flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {refusing ? "Salvando…" : "Confirmar recusa"}
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      <RefusalModal
+        open={refusalModalOpen}
+        displayName={displayName}
+        onClose={handleRefusalModalClose}
+        onConfirm={handleRefusalConfirm}
+      />
 
       {/* Profile drawer */}
-      <Drawer
+      <ProfileDrawer
         open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        title="Perfil"
-      >
-        {member.person && (
-          <PersonProfileDrawer
-            person={member.person}
-            experiences={experiences}
-            historyData={historyData}
-            loadingExps={loadingExps}
-            memberStatus={member.status}
-            onClose={() => setProfileOpen(false)}
-          />
-        )}
-      </Drawer>
+        member={member}
+        onClose={handleProfileClose}
+      />
     </div>
   );
 };
 
-export default MemberAvatar;
+export default memo(MemberAvatar);

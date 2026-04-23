@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, CalendarDays, RefreshCw } from 'lucide-react';
 import Button from '@/components/Button';
@@ -86,16 +86,16 @@ const EncountersList: React.FC = () => {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search, 400);
 
-  const params: Record<string, unknown> = { per_page: 20, page };
-  if (filterStatus) params.status = filterStatus;
+  const params = useMemo(() => ({
+    per_page: 20,
+    page,
+    ...(filterStatus ? { status: filterStatus } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  }), [page, filterStatus, debouncedSearch]);
 
   const { data, isLoading: loading, isError } = useEncounterList(params);
   const encounters = data?.data ?? [];
   const meta = data?.meta ?? null;
-
-  const filtered = debouncedSearch
-    ? encounters.filter((e: Encounter) => e.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-    : encounters;
 
   const total = meta?.total ?? 0;
 
@@ -119,7 +119,7 @@ const EncountersList: React.FC = () => {
             name="search"
             placeholder="Buscar pelo nome..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             startIcon={<Search size={15} />}
           />
           <Select name="filterStatus" value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}>
@@ -139,7 +139,7 @@ const EncountersList: React.FC = () => {
           </div>
         ) : isError ? (
           <div className="py-16 text-center text-sm text-red-500">Erro ao carregar encontros.</div>
-        ) : filtered.length === 0 ? (
+        ) : encounters.length === 0 ? (
           <div className="py-20 text-center">
             <CalendarDays size={40} className="mx-auto mb-3 text-text-muted/30" />
             <p className="text-sm font-medium text-text-muted">Nenhum encontro cadastrado</p>
@@ -151,7 +151,7 @@ const EncountersList: React.FC = () => {
           <>
             <SortableTable
               columns={COLUMNS}
-              rows={filtered}
+              rows={encounters}
               rowKey={(enc) => enc.id}
               getValue={getValue}
               defaultSortKey="date"

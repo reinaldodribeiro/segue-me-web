@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
@@ -10,11 +11,13 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useToast } from '@/hooks/useToast';
 import { MovementPayload, AcceptedType, MovementScope } from '@/interfaces/Movement';
 import MovementService from '@/services/api/MovementService';
+import { queryKeys } from '@/lib/query/keys';
 import { useTutorial } from '@/hooks/useTutorial';
 
 const NewMovement: React.FC = () => {
   useTutorial();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { handleError } = useErrorHandler();
   const { toast } = useToast();
 
@@ -35,6 +38,7 @@ const NewMovement: React.FC = () => {
     };
     try {
       await MovementService.save(payload);
+      queryClient.invalidateQueries({ queryKey: queryKeys.movements.all });
       toast({ title: 'Movimento criado com sucesso.', variant: 'success' });
       router.push('/app/movements');
     } catch (err: unknown) {
@@ -55,11 +59,13 @@ const NewMovement: React.FC = () => {
         <SectionCard title="Identificação" data-tutorial="new-movement-name">
           <div className="space-y-4">
             <Input name="name" label="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
-            <Select name="target_audience" label="Público-alvo" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value as AcceptedType)}>
-              <option value="youth">Jovens</option>
-              <option value="couple">Casais</option>
-              <option value="all">Todos</option>
-            </Select>
+            <div data-tutorial="new-movement-audience">
+              <Select name="target_audience" label="Público-alvo" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value as AcceptedType)}>
+                <option value="youth">Jovens</option>
+                <option value="couple">Casais</option>
+                <option value="all">Todos</option>
+              </Select>
+            </div>
             <Select name="scope" label="Âmbito" value={scope} onChange={(e) => setScope(e.target.value as MovementScope)}>
               <option value="parish">Paroquial</option>
               <option value="sector">Setorial</option>

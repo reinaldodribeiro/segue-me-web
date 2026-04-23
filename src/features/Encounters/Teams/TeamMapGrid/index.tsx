@@ -33,7 +33,7 @@ const TeamMapGrid: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4" data-tutorial="teams-grid">
       {teams.map((team) => (
         <TeamMapCard key={team.id} team={team} />
       ))}

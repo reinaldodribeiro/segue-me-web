@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ArrowLeft, Building2 } from 'lucide-react';
 import Button from '@/components/Button';
@@ -10,6 +11,7 @@ import ColorPicker from '@/components/ColorPicker';
 import { ParishPayload } from '@/interfaces/Parish';
 import ParishService from '@/services/api/ParishService';
 import SectorService from '@/services/api/SectorService';
+import { queryKeys } from '@/lib/query/keys';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useHierarchyCascade } from '@/hooks/useHierarchyCascade';
@@ -32,6 +34,7 @@ interface FormErrors {
 const NewParish: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { isSuperAdmin } = usePermissions();
 
@@ -100,6 +103,8 @@ const NewParish: React.FC = () => {
     };
     try {
       const res = await ParishService.createInSector(form.sectorId, payload);
+      queryClient.invalidateQueries({ queryKey: queryKeys.parishes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.hierarchy.all });
       router.push(`/app/parishes/${res.data.data.id}`);
     } catch (err: unknown) {
       setSubmitError((err as { data?: { message?: string } })?.data?.message ?? 'Erro ao criar paróquia.');

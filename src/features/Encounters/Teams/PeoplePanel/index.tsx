@@ -13,6 +13,7 @@ import {
 } from "@/interfaces/Person";
 import { TeamMemberRole } from "@/interfaces/Encounter";
 import { useEncounterTeams } from "@/context/EncounterTeamsContext";
+import { useEncounterPreviousParticipants } from "@/lib/query/hooks/useEncounters";
 import PersonService from "@/services/api/PersonService";
 import DraggablePerson from "./DraggablePerson";
 
@@ -20,8 +21,13 @@ import DraggablePerson from "./DraggablePerson";
 
 const PeoplePanel: React.FC = () => {
   const {
+    encounterId,
     filteredAvailable,
     loadingPeople,
+    isFetchingNextPage,
+    hasNextPage,
+    totalAvailable,
+    fetchNextPage,
     selectedTeam,
     selectedTeamId,
     setSelectedTeamId,
@@ -34,6 +40,8 @@ const PeoplePanel: React.FC = () => {
     addMember,
   } = useEncounterTeams();
 
+  const { data: previousParticipantIds = [] } = useEncounterPreviousParticipants(encounterId);
+
   const [addRole, setAddRole] = useState<TeamMemberRole>("member");
   const [filterPriority, setFilterPriority] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -42,6 +50,10 @@ const PeoplePanel: React.FC = () => {
   const [experiences, setExperiences] = useState<PersonTeamExperience[]>([]);
   const [historyData, setHistoryData] = useState<PersonHistory[]>([]);
   const lastPersonRef = useRef<Person | null>(null);
+
+  // Refs for IntersectionObserver-based infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   function openProfile(person: Person) {
     lastPersonRef.current = person;
@@ -70,12 +82,37 @@ const PeoplePanel: React.FC = () => {
     load();
   }, [drawerOpen, drawerPerson?.id]);
 
+  // IntersectionObserver: trigger fetchNextPage when sentinel becomes visible
+  // Depends on displayPeople.length because sentinel only exists when list is non-empty
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const scrollContainer = scrollContainerRef.current;
+    if (!sentinel || !scrollContainer || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { root: scrollContainer, threshold: 0.1 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, filteredAvailable.length]);
+
   const displayPeople = useMemo(() => {
     if (!filterPriority) return filteredAvailable;
+    const hasPrevious = previousParticipantIds.length > 0;
     return filteredAvailable
-      .filter((p) => p.encounter_year != null)
+      .filter((p) =>
+        hasPrevious
+          ? previousParticipantIds.includes(p.id)
+          : p.encounter_year != null
+      )
       .sort((a, b) => b.engagement_score - a.engagement_score);
-  }, [filteredAvailable, filterPriority]);
+  }, [filteredAvailable, filterPriority, previousParticipantIds]);
 
   const totalCoordSlots = selectedTeam
     ? selectedTeam.coordinators_youth + selectedTeam.coordinators_couples
@@ -107,7 +144,7 @@ const PeoplePanel: React.FC = () => {
 
   return (
     <>
-      <div className="bg-panel border border-border rounded-xl p-4 space-y-3 sticky top-4">
+      <div className="bg-panel border border-border rounded-xl p-4 space-y-3 sticky top-4" data-tutorial="teams-people-panel">
         <h2 className="font-semibold text-sm text-text">Pessoas disponíveis</h2>
 
         {selectedTeam ? (
@@ -187,7 +224,14 @@ const PeoplePanel: React.FC = () => {
           {filterPriority ? "✓ " : ""}Prioridade (vivenciaram o último encontro)
         </button>
 
-        <div className="space-y-0.5 max-h-[55vh] overflow-y-auto">
+        {/* Total count */}
+        {!loadingPeople && totalAvailable > 0 && (
+          <p className="text-xs text-text-muted text-center font-medium">
+            {filteredAvailable.length} de {totalAvailable} pessoas disponíveis
+          </p>
+        )}
+
+        <div ref={scrollContainerRef} className="space-y-0.5 max-h-[55vh] overflow-y-auto">
           {loadingPeople ? (
             <div className="flex items-center justify-center py-6 gap-2 text-text-muted">
               <RefreshCw size={14} className="animate-spin" />
@@ -200,15 +244,28 @@ const PeoplePanel: React.FC = () => {
                 : "Nenhuma pessoa disponível."}
             </p>
           ) : (
-            displayPeople.map((p) => (
-              <DraggablePerson
-                key={p.id}
-                person={p}
-                selected={!!selectedTeamId}
-                onAdd={() => addMember(p.id, addRole)}
-                onInfo={() => openProfile(p)}
-              />
-            ))
+            <>
+              {displayPeople.map((p) => (
+                <DraggablePerson
+                  key={p.id}
+                  person={p}
+                  selected={!!selectedTeamId}
+                  onAdd={() => addMember(p.id, addRole)}
+                  onInfo={() => openProfile(p)}
+                />
+              ))}
+
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-4" />
+
+              {/* Loading indicator for next page */}
+              {isFetchingNextPage && (
+                <div className="flex items-center justify-center py-3 gap-2 text-text-muted">
+                  <RefreshCw size={12} className="animate-spin" />
+                  <span className="text-xs">Carregando mais...</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

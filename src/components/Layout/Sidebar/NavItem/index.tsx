@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
@@ -7,7 +8,7 @@ import { cn } from '@/utils/helpers';
 import SidebarTooltip from '../SidebarTooltip';
 import { NavItemProps } from './types';
 
-const NavItem: React.FC<NavItemProps> = ({ href, icon: Icon, label, collapsed, onClick }) => {
+const NavItem = memo(function NavItem({ href, icon: Icon, label, collapsed, onClick }: NavItemProps) {
   const pathname = usePathname();
   const isActive = pathname === href || (href !== '/app' && pathname.startsWith(href));
 
@@ -33,6 +34,6 @@ const NavItem: React.FC<NavItemProps> = ({ href, icon: Icon, label, collapsed, o
 
   if (collapsed) return <SidebarTooltip label={label}>{inner}</SidebarTooltip>;
   return inner;
-};
+});
 
 export default NavItem;

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useParishSkills } from '@/lib/query/hooks/usePersons';
 import { useMovementList, useMovementTeams } from '@/lib/query/hooks/useMovements';
 import { useRouter } from 'next/navigation';
@@ -16,7 +17,9 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useAuth } from '@/hooks/useAuth';
 import { PersonPayload, PersonType, PersonTeamExperience, TeamExperienceRole } from '@/interfaces/Person';
 import PersonService from '@/services/api/PersonService';
+import { queryKeys } from '@/lib/query/keys';
 import { cn } from '@/utils/helpers';
+import { useTutorial } from '@/hooks/useTutorial';
 
 interface Duplicate { id: string; name: string }
 
@@ -62,7 +65,9 @@ const SACRAMENT_LABELS: Record<string, string> = {
 };
 
 const NewPerson: React.FC = () => {
+  useTutorial();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const { user } = useAuth();
@@ -304,6 +309,7 @@ const NewPerson: React.FC = () => {
         }
       }
 
+      queryClient.invalidateQueries({ queryKey: queryKeys.persons.all });
       toast({ title: 'Ficha cadastrada com sucesso.', variant: 'success' });
       router.push('/app/people');
     } catch (err: unknown) {
@@ -358,7 +364,7 @@ const NewPerson: React.FC = () => {
 
       <form onSubmit={(e) => handleSubmit(e)} className="space-y-5">
         {/* Photo */}
-        <SectionCard title="Foto">
+        <SectionCard title="Foto" data-tutorial="new-person-photo">
           <div className="flex items-center gap-4">
             <div className="relative shrink-0">
               {photoPreview ? (
@@ -399,7 +405,7 @@ const NewPerson: React.FC = () => {
           </div>
         </SectionCard>
 
-        <SectionCard title="Tipo e Identificação">
+        <SectionCard title="Tipo e Identificação" data-tutorial="new-person-type">
           <div className="space-y-4">
             <Select name="type" label="Tipo" value={type} onChange={(e) => setType(e.target.value as PersonType)} required>
               <option value="youth">Jovem</option>
@@ -416,7 +422,7 @@ const NewPerson: React.FC = () => {
           </div>
         </SectionCard>
 
-        <SectionCard title="Datas">
+        <SectionCard title="Datas" data-tutorial="new-person-basic-fields">
           <div className="space-y-4">
             <DateInput name="birth_date" label={isCouple ? 'Data de nascimento (cônjuge 1)' : 'Data de nascimento'} value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             {isCouple && (
@@ -686,7 +692,7 @@ const NewPerson: React.FC = () => {
         </SectionCard>
 
         {/* Skills */}
-        <SectionCard title="Habilidades">
+        <SectionCard title="Habilidades" data-tutorial="new-person-skills">
           <div className="space-y-3">
             {allSkillOptions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
@@ -730,7 +736,7 @@ const NewPerson: React.FC = () => {
         </SectionCard>
 
         {/* Team Experiences */}
-        <SectionCard title="Equipes Anteriores">
+        <SectionCard title="Equipes Anteriores" data-tutorial="new-person-experiences">
           <div className="space-y-3">
             {experiences.length > 0 && (
               <div className="space-y-2">

@@ -32,8 +32,10 @@ import TeamForm from './TeamForm';
 import SortableTeamRow from './SortableTeamRow';
 
 import { MovementDetailProps } from './types';
+import { useTutorial } from '@/hooks/useTutorial';
 
 const MovementDetail: React.FC<MovementDetailProps> = ({ id }) => {
+  useTutorial();
   const router = useRouter();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
@@ -179,7 +181,7 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ id }) => {
       <h1 className="text-xl font-bold text-text">{movement.name}</h1>
 
       <form onSubmit={handleSave} className="space-y-5">
-        <SectionCard title="Informações">
+        <SectionCard title="Informações" data-tutorial="movement-detail-info">
           <div className="space-y-4">
             <Input name="name" label="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
             <Select name="target_audience" label="Público-alvo" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value as AcceptedType)}>
@@ -216,10 +218,13 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ id }) => {
       {/* Team templates */}
       <SectionCard
         title="Equipes-modelo"
+        data-tutorial="movement-detail-teams"
         action={
-          <Button size="sm" variant="ghost" leftIcon={<Plus size={13} />} onClick={() => setAddingTeam(true)}>
-            Adicionar
-          </Button>
+          <div data-tutorial="movement-detail-add-team">
+            <Button size="sm" variant="ghost" leftIcon={<Plus size={13} />} onClick={() => setAddingTeam(true)}>
+              Adicionar
+            </Button>
+          </div>
         }
       >
         <div className="space-y-1">

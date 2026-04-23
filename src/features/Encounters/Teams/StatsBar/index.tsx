@@ -9,7 +9,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ totalFilled, totalSlots, totalConfi
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-tutorial="teams-stats-bar">
       {stats.map(({ label, value, color }) => (
         <div key={label} className="bg-panel border border-border rounded-xl px-4 py-3 text-center">
           <p className={`text-xl font-bold ${color}`}>{value}</p>

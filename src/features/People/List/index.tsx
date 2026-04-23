@@ -68,6 +68,9 @@ const PeopleList: React.FC = () => {
             <img
               src={storageUrl(person.photo) ?? ""}
               alt=""
+              width={28}
+              height={28}
+              loading="lazy"
               className="w-7 h-7 rounded-full object-cover shrink-0"
             />
           ) : (
@@ -178,12 +181,15 @@ const PeopleList: React.FC = () => {
   const { data: sectors = [] } = useHierarchySectors(isAdmin ? filterDiocese : '');
   const { data: parishes = [] } = useHierarchyParishes(isAdmin ? filterSector : '');
 
-  const listParams: Record<string, unknown> = { per_page: 30, page, sort_by: sortBy, sort_dir: sortDir };
-  if (debouncedSearch) listParams.search = debouncedSearch;
-  if (filterType) listParams.type = filterType;
-  if (filterParish) listParams.parish_id = filterParish;
-  else if (filterSector) listParams.sector_id = filterSector;
-  else if (filterDiocese) listParams.diocese_id = filterDiocese;
+  const listParams = useMemo(() => {
+    const p: Record<string, unknown> = { per_page: 30, page, sort_by: sortBy, sort_dir: sortDir };
+    if (debouncedSearch) p.search = debouncedSearch;
+    if (filterType) p.type = filterType;
+    if (filterParish) p.parish_id = filterParish;
+    else if (filterSector) p.sector_id = filterSector;
+    else if (filterDiocese) p.diocese_id = filterDiocese;
+    return p;
+  }, [page, sortBy, sortDir, debouncedSearch, filterType, filterParish, filterSector, filterDiocese]);
 
   const { data: listData, isLoading: loading, isError } = usePersonList(listParams);
   const people = listData?.data ?? [];
@@ -246,6 +252,7 @@ const PeopleList: React.FC = () => {
               Importar
             </Button>
           </div>
+          {/* OCR — hidden until feature is ready
           <div data-tutorial="people-ocr-btn">
             <Button
               variant="secondary"
@@ -255,6 +262,7 @@ const PeopleList: React.FC = () => {
               OCR
             </Button>
           </div>
+          */}
           <Link href="/app/people/new" data-tutorial="people-new-btn">
             <Button leftIcon={<Plus size={16} />}>Nova Ficha</Button>
           </Link>

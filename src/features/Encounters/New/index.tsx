@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import DateInput from '@/components/DateInput';
@@ -13,6 +14,7 @@ import { EncounterPayload } from '@/interfaces/Encounter';
 import { Movement } from '@/interfaces/Movement';
 import EncounterService from '@/services/api/EncounterService';
 import MovementService from '@/services/api/MovementService';
+import { queryKeys } from '@/lib/query/keys';
 import { useTutorial } from '@/hooks/useTutorial';
 
 const MONTH_NAMES = [
@@ -38,6 +40,7 @@ function buildDatesSummary(startIso: string, days: number): string {
 const NewEncounter: React.FC = () => {
   useTutorial();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
 
@@ -80,6 +83,7 @@ const NewEncounter: React.FC = () => {
     };
     try {
       const res = await EncounterService.save(payload);
+      queryClient.invalidateQueries({ queryKey: queryKeys.encounters.all });
       toast({ title: 'Encontro criado com sucesso.', variant: 'success' });
       router.push(`/app/encounters/${res.data.data.id}`);
     } catch (err: unknown) {
@@ -105,8 +109,10 @@ const NewEncounter: React.FC = () => {
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </Select>
-            <Input name="name" label="Nome do encontro" value={name} onChange={(e) => setName(e.target.value)} required />
-            <Input name="edition_number" label="Edição (opcional)" type="number" min={1} value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} />
+            <div data-tutorial="new-encounter-name" className="space-y-4">
+              <Input name="name" label="Nome do encontro" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input name="edition_number" label="Edição (opcional)" type="number" min={1} value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} />
+            </div>
           </div>
         </SectionCard>
 
@@ -130,16 +136,18 @@ const NewEncounter: React.FC = () => {
                 📅 {datesSummary}
               </p>
             )}
-            <Input name="location" label="Local" value={location} onChange={(e) => setLocation(e.target.value)} />
-            <Input
-              name="max_participants"
-              label="Vagas máximas para encontristas (opcional)"
-              type="number"
-              min={1}
-              max={9999}
-              value={maxParticipants}
-              onChange={(e) => setMaxParticipants(e.target.value)}
-            />
+            <div data-tutorial="new-encounter-location" className="space-y-4">
+              <Input name="location" label="Local" value={location} onChange={(e) => setLocation(e.target.value)} />
+              <Input
+                name="max_participants"
+                label="Vagas máximas para encontristas (opcional)"
+                type="number"
+                min={1}
+                max={9999}
+                value={maxParticipants}
+                onChange={(e) => setMaxParticipants(e.target.value)}
+              />
+            </div>
           </div>
         </SectionCard>
 
