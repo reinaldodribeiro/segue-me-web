@@ -37,6 +37,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const [token, setToken] = useLocalStorage<string | null>("authToken", null);
   const [user, setUser] = useLocalStorage<User | null>("userData", null);
+  const [, setTokenExpiresAt] = useLocalStorage<string | null>("tokenExpiresAt", null);
 
   // Keep the cookie in sync with localStorage so middleware can read it
   useEffect(() => {
@@ -59,6 +60,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         if ((err as { status?: number })?.status === 401) {
           setToken(null);
           setUser(null);
+          setTokenExpiresAt(null);
           router.push("/auth/login");
         }
       }
@@ -78,6 +80,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         if (res.status === 200 && res.data.token) {
           setToken(res.data.token);
           setUser(res.data.user);
+          setTokenExpiresAt(res.data.expires_at);
           onSuccess?.();
         }
       } catch (err) {
@@ -88,7 +91,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         }
       }
     },
-    [setToken, setUser],
+    [setToken, setUser, setTokenExpiresAt],
   );
 
   const signInWithToken = useCallback(
@@ -107,9 +110,10 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     } finally {
       setToken(null);
       setUser(null);
+      setTokenExpiresAt(null);
       router.push("/auth/login");
     }
-  }, [setToken, setUser, router]);
+  }, [setToken, setUser, setTokenExpiresAt, router]);
 
   const valueData: AuthContextData = useMemo(
     () => ({

@@ -5,6 +5,7 @@ import {
   ForgotPasswordPayload,
   LoginPayload,
   LoginResponse,
+  RefreshResponse,
   ResetPasswordPayload,
 } from "@/interfaces/Auth";
 
@@ -15,6 +16,10 @@ class AuthService {
 
   logout(): Promise<AxiosResponse<void>> {
     return api.post<void, void>("auth/logout");
+  }
+
+  refresh(): Promise<AxiosResponse<RefreshResponse>> {
+    return api.post<void, RefreshResponse>("auth/refresh");
   }
 
   forgotPassword(

@@ -7,6 +7,13 @@ export interface LoginPayload {
 
 export interface LoginResponse {
   token: string;
+  expires_at: string;
+  user: User;
+}
+
+export interface RefreshResponse {
+  token: string;
+  expires_at: string;
   user: User;
 }
 
